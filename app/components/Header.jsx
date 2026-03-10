@@ -19,14 +19,12 @@ export default function Header() {
     { href: "/news", label: { en: "News", ru: "Новости", uz: "Yangiliklar" } },
   ];
 
-  // Scroll tracker
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 0);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Dark / Light mode body class
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add("bg-gray-900", "text-white");
@@ -52,11 +50,11 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-2">
           {/* Logo */}
-          <div>
+          <div className="flex-shrink-0">
             <Image
               src={Logo}
               alt="Logo"
-              className="h-[100px] w-[100px] rounded-full bg-white object-contain"
+              className="h-[80px] sm:h-[100px] w-[80px] sm:w-[100px] rounded-full bg-white object-contain"
             />
           </div>
 
@@ -80,9 +78,8 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Language + Dark Mode + Mobile */}
-          <div className="flex gap-4 items-center">
-            {/* Language Selector */}
+          {/* Desktop Language + Dark Mode */}
+          <div className="hidden sm:flex gap-4 items-center">
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
@@ -93,58 +90,57 @@ export default function Header() {
               <option value="uz">UZ</option>
             </select>
 
-            {/* Dark / Light Mode */}
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="text-2xl transition-colors duration-300 hover:text-blue-500"
             >
               {darkMode ? <MdLightMode /> : <MdDarkMode />}
             </button>
+          </div>
 
-            {/* Mobile menu button */}
+          {/* Mobile hamburger */}
+          <div className="sm:hidden flex items-center gap-2">
             <button
               onClick={() => setOpen(!open)}
-              className="sm:hidden focus:outline-none"
-              aria-label="Toggle menu"
+              className="flex flex-col justify-between w-8 h-6 focus:outline-none"
             >
-              {open ? (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              )}
+              <span
+                className={`block h-1 w-full rounded transition-all duration-300 ${
+                  open
+                    ? "bg-white rotate-45 translate-y-2" // X ochiq holatda doimo oq
+                    : scrolled || darkMode
+                      ? "bg-gray-900" // yopiq holatda scroll/dark bo'lsa qora
+                      : "bg-white" // yopiq holatda default oq
+                }`}
+              />
+              <span
+                className={`block h-1 w-full rounded transition-all duration-300 ${
+                  open
+                    ? "bg-white opacity-0" // X ochiq holatda yashiradi
+                    : scrolled || darkMode
+                      ? "bg-gray-900"
+                      : "bg-white"
+                }`}
+              />
+              <span
+                className={`block h-1 w-full rounded transition-all duration-300 ${
+                  open
+                    ? "bg-white -rotate-45 -translate-y-2" // X ochiq holatda doimo oq
+                    : scrolled || darkMode
+                      ? "bg-gray-900"
+                      : "bg-white"
+                }`}
+              />
             </button>
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile menu dropdown like old version */}
         {open && (
-          <nav className="sm:hidden pb-4 flex flex-col gap-2">
+          <nav
+            className={`sm:hidden flex flex-col gap-2 mt-2 pb-4 p-4 rounded-md shadow-md transition-colors duration-300
+              ${darkMode ? "bg-gray-800" : "bg-white"}`}
+          >
             {links.map((link) => {
               const mobileLinkColor = darkMode
                 ? "text-white hover:text-gray-300"
@@ -160,6 +156,24 @@ export default function Header() {
                 </Link>
               );
             })}
+
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className={`mt-2 px-2 py-1 border rounded bg-transparent text-current cursor-pointer`}
+            >
+              <option value="en">EN</option>
+              <option value="ru">RU</option>
+              <option value="uz">UZ</option>
+            </select>
+
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="mt-2 flex items-center gap-2 text-lg transition-colors duration-300 hover:text-blue-500"
+            >
+              {darkMode ? <MdLightMode /> : <MdDarkMode />}
+              <span className="text-sm">Mode</span>
+            </button>
           </nav>
         )}
       </div>

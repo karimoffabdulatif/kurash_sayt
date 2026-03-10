@@ -1,8 +1,5 @@
 'use client';
 import { useState, useEffect } from "react";
-import Image from "next/image";
-
-
 
 const slides = [
   {
@@ -21,9 +18,9 @@ const slides = [
     img: "/banner-3.jpg",
   },
   {
-    title: "Join Our Community",
-    subtitle: "Be a part of something big.",
-    img: "/banner43.jpg",
+    title: "Explore More",
+    subtitle: "Stay tuned for updates.",
+    img: "/banner-4.jpg",
   },
 ];
 
@@ -34,7 +31,7 @@ export default function Hero() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 5000); // 5 soniya
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -43,18 +40,24 @@ export default function Hero() {
       {slides.map((slide, idx) => (
         <div
           key={idx}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
+          className={`absolute inset-0 transition-opacity duration-[2000ms] ease-in-out ${
             idx === current ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
-          style={{
-            backgroundImage: `url(${slide.img})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
         >
-          {/* Overlay */}
-          <div className="h-full w-full bg-black/40 flex items-center justify-center px-4 sm:px-6">
-            <div className="text-center text-white max-w-3xl">
+          {/* Rasm xira bo'lishi va overlay */}
+          <div
+            className="absolute inset-0 bg-black/90"
+            style={{
+              backgroundImage: `url(${slide.img})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "brightness(30%)",
+            }}
+          ></div>
+
+          {/* Slide content – text doim e’tibor tortadi */}
+          <div className="relative h-full w-full flex items-center justify-center px-4 sm:px-6">
+            <div className="text-center text-white max-w-3xl z-20">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
                 {slide.title}
               </h1>
@@ -65,7 +68,7 @@ export default function Hero() {
       ))}
 
       {/* Navigation Dots */}
-      <div className="absolute bottom-6 w-full flex justify-center gap-3">
+      <div className="absolute bottom-6 w-full flex justify-center gap-3 z-20">
         {slides.map((_, idx) => (
           <button
             key={idx}
