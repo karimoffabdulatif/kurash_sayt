@@ -16,7 +16,7 @@ export default function Header() {
     { href: "/about", label: { en: "About", ru: "О нас", uz: "Biz haqimizda" } },
     { href: "/contact", label: { en: "Contact", ru: "Контакты", uz: "Kontaktlar" } },
     { href: "/directing", label: { en: "Directing", ru: "Режиссура", uz: "Direktorlash" } },
-    { href: "/news", label: { en: "News", ru: "Новости", uz: "Yangiliklar" } },
+    { href: "/newsPage", label: { en: "News", ru: "Новости", uz: "Yangiliklar" } },
   ];
 
   useEffect(() => {
