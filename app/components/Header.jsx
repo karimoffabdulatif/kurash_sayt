@@ -54,7 +54,7 @@ export default function Header() {
             <Image
               src={Logo}
               alt="Logo"
-              className="h-[80px] sm:h-[100px] w-[80px] sm:w-[100px] rounded-full bg-white object-contain"
+              className="h-[60px] sm:h-[100px] w-[60px] sm:w-[100px] rounded-full bg-white object-contain"
             />
           </div>
 
@@ -102,7 +102,7 @@ export default function Header() {
           <div className="sm:hidden flex items-center gap-2">
             <button
               onClick={() => setOpen(!open)}
-              className="flex flex-col justify-between w-8 h-6 focus:outline-none"
+              className="flex flex-col justify-between w-7 h-5 focus:outline-none"
             >
               <span
                 className={`block h-1 w-full rounded transition-all duration-300 ${
