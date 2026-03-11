@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 const images = [
@@ -161,9 +162,11 @@ function TextContent({ center = false }) {
         kurash sportini jahon miqyosida yangi bosqichga olib chiqamiz.
       </p>
 
+      <Link href="/about">
       <button className="font-montserrat text-[10px] sm:text-[11px] font-medium tracking-[3px] uppercase border border-blue-400 text-blue-400 px-8 sm:px-10 py-3 sm:py-3.5 rounded-[8px] hover:bg-blue-500 hover:border-gray-400 hover:text-[#f7f5f2] transition-all duration-300 cursor-pointer">
         Batafsil →
       </button>
+      </Link>
 
     </div>
   );
