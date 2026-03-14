@@ -1,14 +1,32 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
+import { getNews } from "../lib/newsService";
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState("uz");
+  const [newsList, setNewsList] = useState([]);
+  const [loading, setLoading]   = useState(true);
 
-  // Dark mode — html ga class qo'shiladi
+  // Firebase dan yangiliklar yuklash
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        const data = await getNews();
+        setNewsList(data);
+      } catch (e) {
+        console.error("Yangiliklar yuklanmadi:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchNews();
+  }, []);
+
+  // Dark mode
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) {
@@ -22,8 +40,19 @@ export function AppProvider({ children }) {
     }
   }, [darkMode]);
 
+  // Yangilik qo'shilgandan keyin qayta yuklash
+  const refreshNews = async () => {
+    const data = await getNews();
+    setNewsList(data);
+  };
+
   return (
-    <AppContext.Provider value={{ darkMode, setDarkMode, language, setLanguage }}>
+    <AppContext.Provider value={{
+      darkMode, setDarkMode,
+      language, setLanguage,
+      newsList, loading,
+      refreshNews,
+    }}>
       {children}
     </AppContext.Provider>
   );
