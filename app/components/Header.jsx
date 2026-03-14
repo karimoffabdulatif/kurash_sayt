@@ -4,6 +4,7 @@ import Logo from "../../public/logo-or.png";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
+import { useApp } from "../contex/AppContext";
 
 const links = [
   { href: "/",          num: "01", label: { en: "Home",      ru: "Главная",   uz: "Bosh sahifa"   } },
@@ -16,10 +17,9 @@ const links = [
 const LANGS = ["en", "ru", "uz"];
 
 export default function Header() {
+  const { darkMode, setDarkMode, language, setLanguage } = useApp();
   const [open, setOpen]         = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState("en");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -28,22 +28,22 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    document.body.classList.toggle("bg-gray-900",   darkMode);
-    document.body.classList.toggle("text-white",    darkMode);
-    document.body.classList.toggle("bg-white",      !darkMode);
-    document.body.classList.toggle("text-gray-900", !darkMode);
-  }, [darkMode]);
-
-  /* Scroll lock when menu open */
-  useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
+  const getScrolledBg = () => {
+    if (!scrolled) return undefined;
+    if (darkMode) return { background: "#0a1628" };
+    return {
+      background: "linear-gradient(to right, rgb(255, 255, 255) 0%, rgb(29, 78, 216) 100%)"
+    };
+  };
+
   const navLinkColor = darkMode
     ? "text-white hover:text-blue-300"
     : scrolled
-      ? "text-gray-800 hover:text-blue-500"
+      ? "text-gray-800 hover:text-blue-600"
       : "text-white hover:text-blue-200";
 
   return (
@@ -51,8 +51,6 @@ export default function Header() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
         .bebas { font-family: 'Bebas Neue', sans-serif; }
-
-        /* Mobile menu slide down */
         .mobile-menu {
           transform: translateY(-8px);
           opacity: 0;
@@ -64,8 +62,6 @@ export default function Header() {
           opacity: 1;
           pointer-events: auto;
         }
-
-        /* Staggered link reveal */
         @keyframes linkIn {
           from { opacity: 0; transform: translateX(-20px); }
           to   { opacity: 1; transform: translateX(0); }
@@ -74,8 +70,6 @@ export default function Header() {
           opacity: 0;
           animation: linkIn 0.4s cubic-bezier(.16,1,.3,1) forwards;
         }
-
-        /* Desktop underline */
         .nav-underline::after {
           content: '';
           position: absolute;
@@ -89,25 +83,15 @@ export default function Header() {
         .nav-underline:hover::after { transform: scaleX(1); }
       `}</style>
 
-      {/* ══════════════════════════════
-          HEADER — z-[100] en yuqori
-      ══════════════════════════════ */}
       <header
         className={`fixed top-0 w-full z-[100] transition-all duration-500 ${
-          scrolled
-            ? darkMode
-              ? "bg-gray-900/95 backdrop-blur-md shadow-lg"
-              : "backdrop-blur-md shadow-md shadow-blue-200/40"
-            : "bg-transparent"
+          scrolled ? "backdrop-blur-md shadow-md" : "bg-transparent"
         }`}
-        style={scrolled && !darkMode ? {
-          background: "linear-gradient(to right, rgb(255, 255, 255) 0%, rgb(96, 165, 250) 100%)"
-        } : undefined}
+        style={getScrolledBg()}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-2 sm:py-3">
 
-            {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <Image
                 src={Logo}
@@ -116,7 +100,6 @@ export default function Header() {
               />
             </Link>
 
-            {/* Desktop nav */}
             <nav className="hidden sm:flex items-center gap-1">
               {links.map((link) => (
                 <Link
@@ -129,7 +112,6 @@ export default function Header() {
               ))}
             </nav>
 
-            {/* Desktop controls */}
             <div className="hidden sm:flex items-center gap-3">
               <div className={`flex rounded-full overflow-hidden border ${
                 darkMode ? "border-gray-600" : scrolled ? "border-gray-200" : "border-white/30"
@@ -140,11 +122,11 @@ export default function Header() {
                     onClick={() => setLanguage(l)}
                     className={`px-3 py-1 text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                       language === l
-                        ? "bg-blue-400 text-white"
+                        ? "bg-blue-700 text-white"
                         : darkMode
                           ? "text-gray-300 hover:text-white"
                           : scrolled
-                            ? "text-gray-500 hover:text-gray-800"
+                            ? "text-gray-600 hover:text-gray-900"
                             : "text-white/70 hover:text-white"
                     }`}
                   >
@@ -154,12 +136,12 @@ export default function Header() {
               </div>
 
               <button
-                onClick={() => setDarkMode(!darkMode)}
+                onClick={() => setDarkMode(prev => !prev)}
                 className={`w-9 h-9 rounded-full flex items-center justify-center text-lg transition-all duration-300 hover:scale-110 ${
                   darkMode
-                    ? "bg-gray-700 text-yellow-300 hover:bg-gray-600"
+                    ? "bg-yellow-400/20 text-yellow-300 hover:bg-yellow-400/30"
                     : scrolled
-                      ? "bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-500"
+                      ? "bg-[#0f2a5e]/10 text-[#0f2a5e] hover:bg-[#0f2a5e]/20"
                       : "bg-white/15 text-white hover:bg-white/25"
                 }`}
               >
@@ -167,57 +149,39 @@ export default function Header() {
               </button>
             </div>
 
-            {/* ── Mobile hamburger — z-[110] har doim ustida ── */}
+            {/* Mobile hamburger */}
             <button
               onClick={() => setOpen(prev => !prev)}
               aria-label={open ? "Menyuni yopish" : "Menyuni ochish"}
               className="sm:hidden z-[110] relative w-10 h-10 flex flex-col justify-center items-center gap-[6px] focus:outline-none"
             >
-              {/* Chiziq 1 */}
-              <span
-                className={`block h-[2px] w-6 rounded-full transition-all duration-300 ${
-                  open ? "rotate-45 translate-y-2 bg-white"
-                    : scrolled || darkMode ? "bg-gray-800" : "bg-white"
-                }`}
-              />
-              {/* Chiziq 2 */}
-              <span
-                className={`block h-[2px] rounded-full transition-all duration-300 ${
-                  open ? "w-0 opacity-0"
-                    : "w-6 opacity-100 " + (scrolled || darkMode ? "bg-gray-800" : "bg-white")
-                }`}
-              />
-              {/* Chiziq 3 */}
-              <span
-                className={`block h-[2px] w-6 rounded-full transition-all duration-300 ${
-                  open ? "-rotate-45 -translate-y-2 bg-white"
-                    : scrolled || darkMode ? "bg-gray-800" : "bg-white"
-                }`}
-              />
+              <span className={`block h-[2px] w-6 rounded-full transition-all duration-300 ${
+                open ? "rotate-45 translate-y-2 bg-white"
+                  : darkMode ? "bg-white" : scrolled ? "bg-gray-800" : "bg-white"
+              }`} />
+              <span className={`block h-[2px] rounded-full transition-all duration-300 ${
+                open ? "w-0 opacity-0"
+                  : "w-6 opacity-100 " + (darkMode ? "bg-white" : scrolled ? "bg-gray-800" : "bg-white")
+              }`} />
+              <span className={`block h-[2px] w-6 rounded-full transition-all duration-300 ${
+                open ? "-rotate-45 -translate-y-2 bg-white"
+                  : darkMode ? "bg-white" : scrolled ? "bg-gray-800" : "bg-white"
+              }`} />
             </button>
-
           </div>
         </div>
       </header>
 
-      {/* ══════════════════════════════
-          MOBILE MENU — sahifaning
-          70% ini qoplaydi, tepada header ko'rinib turadi
-      ══════════════════════════════ */}
+      {/* Mobile menu */}
       <div
         className={`sm:hidden fixed top-0 left-0 right-0 z-[90] mobile-menu ${open ? "open" : ""}`}
         style={{ height: "75vh" }}
       >
-        {/* Fon */}
-        <div className={`absolute inset-0 ${darkMode ? "bg-gray-950" : "bg-[#1a3a6b]"}`} />
-
-        {/* Dekorativ diagonal */}
+        <div className={`absolute inset-0 ${darkMode ? "bg-[#0a1628]" : "bg-[#0f2a5e]"}`} />
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{ background: "linear-gradient(135deg, transparent 50%, #60a5fa 100%)" }}
         />
-
-        {/* Katta bg yozuv */}
         <div
           className="absolute bottom-4 right-4 bebas leading-none select-none pointer-events-none text-white/[0.04]"
           style={{ fontSize: "clamp(80px, 25vw, 140px)" }}
@@ -225,10 +189,7 @@ export default function Header() {
           WBK
         </div>
 
-        {/* Kontent */}
         <div className="relative z-10 flex flex-col h-full px-6 pt-24 pb-6">
-
-          {/* Nav links */}
           <nav className="flex flex-col flex-1 justify-center gap-0">
             {links.map((link, i) => (
               <Link
@@ -254,7 +215,6 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Bottom: til + dark mode */}
           <div className="flex items-center justify-between pt-4 border-t border-white/10">
             <div className="flex gap-1.5">
               {LANGS.map((l) => (
@@ -263,7 +223,7 @@ export default function Header() {
                   onClick={() => setLanguage(l)}
                   className={`px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all duration-200 ${
                     language === l
-                      ? "bg-blue-400 text-white"
+                      ? "bg-blue-700 text-white"
                       : "bg-white/10 text-white/50 hover:bg-white/20 hover:text-white"
                   }`}
                 >
@@ -271,19 +231,16 @@ export default function Header() {
                 </button>
               ))}
             </div>
-
             <button
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={() => setDarkMode(prev => !prev)}
               className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-lg transition-all duration-300"
             >
               {darkMode ? <MdLightMode /> : <MdDarkMode />}
             </button>
           </div>
-
         </div>
       </div>
 
-      {/* Backdrop — menyu tashqarisiga bosganda yopiladi */}
       {open && (
         <div
           className="sm:hidden fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm"
