@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Hero from "./components/Hero";
 import MainSection from "./components/MainSection";
 import News from "./components/news";
+import President from "./components/president";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -89,6 +90,7 @@ export default function Home() {
       )}
 
       <Hero />
+      <President />
       <MainSection />
       <News />
     </>

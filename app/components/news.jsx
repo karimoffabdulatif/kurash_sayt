@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 const TICKER_WORDS = [
@@ -11,7 +11,6 @@ const TICKER_WORDS = [
 
 const FEATURED = {
   category: "Musobaqa",
-  date: "12 Mart 2026",
   readTime: "3 daq",
   title: "2026 Dunyo Chempionati saralash bosqichi boshlandi",
   excerpt:
@@ -23,6 +22,19 @@ export default function News() {
   const all = [...TICKER_WORDS, ...TICKER_WORDS, ...TICKER_WORDS];
   const [hov, setHov] = useState(false);
   const [btnHov, setBtnHov] = useState(false);
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    const months = [
+      "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+      "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
+    ];
+    const now = new Date();
+    const day = now.getDate();
+    const month = months[now.getMonth()];
+    const year = now.getFullYear();
+    setCurrentDate(`${day} ${month} ${year}`);
+  }, []);
 
   return (
     <section>
@@ -60,8 +72,6 @@ export default function News() {
       <div className="bg-[#f7f5f2] px-4 sm:px-8 lg:px-16 py-8 sm:py-10 lg:py-12">
         <div className="max-w-6xl mx-auto">
 
-        
-
           <div
             onMouseEnter={() => setHov(true)}
             onMouseLeave={() => setHov(false)}
@@ -78,7 +88,6 @@ export default function News() {
               className="relative overflow-hidden h-52 sm:h-72 lg:h-auto"
               style={{ minHeight: "unset" }}
             >
-              {/* desktop da rasm content bilan teng balandlikda bo'lishi uchun */}
               <div className="hidden lg:block absolute inset-0">
                 <img
                   src={FEATURED.img}
@@ -90,7 +99,6 @@ export default function News() {
                   }}
                 />
               </div>
-              {/* mobile/tablet da normal flow img */}
               <img
                 src={FEATURED.img}
                 alt={FEATURED.title}
@@ -116,9 +124,9 @@ export default function News() {
             {/* ── Content panel ── */}
             <div className="flex flex-col justify-between p-5 sm:p-7 lg:p-10 bg-gradient-to-br from-blue-50 to-white">
               <div>
-                {/* Meta */}
+                {/* Meta — sana endi dinamik */}
                 <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                  <span className="text-blue-400 font-bold text-xs sm:text-sm">{FEATURED.date}</span>
+                  <span className="text-blue-400 font-bold text-xs sm:text-sm">{currentDate}</span>
                   <span className="text-blue-200 text-xs">•</span>
                   <span className="text-blue-300 text-xs sm:text-sm">⏱ {FEATURED.readTime}</span>
                 </div>
@@ -140,7 +148,6 @@ export default function News() {
                   style={{ width: hov ? "100%" : "40%" }}
                 />
 
-                {/* Excerpt — mobile: 3 qator, katta: to'liq */}
                 <p className="text-slate-500 text-xs sm:text-sm leading-relaxed mb-5 sm:mb-8 line-clamp-3 sm:line-clamp-none">
                   {FEATURED.excerpt}
                 </p>
