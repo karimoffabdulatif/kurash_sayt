@@ -3,6 +3,8 @@
 import { useState, useRef } from "react";
 import { addNewsToDb, deleteNewsFromDb } from "../lib/newsService";
 import { useApp } from "../contex/AppContext";
+import { MdLockOutline, MdVisibility, MdVisibilityOff, MdErrorOutline, MdCheckCircle, MdAddCircleOutline, MdList, MdDelete, MdImage, MdHourglassEmpty } from "react-icons/md";
+import { FiCalendar } from "react-icons/fi";
 
 const ADMIN_LOGIN    = process.env.NEXT_PUBLIC_ADMIN_LOGIN    || "admin";
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "12345";
@@ -29,13 +31,13 @@ const CAT_MAP = {
   "Xalqaro":   { en: "International", ru: "Международный" },
 };
 
-/* ── Login sahifasi ── */
+/* ── Login ── */
 function LoginPage({ onLogin }) {
-  const [login, setLogin]     = useState("");
+  const [login, setLogin]       = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]     = useState("");
+  const [error, setError]       = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]   = useState(false);
 
   const handleLogin = () => {
     if (!login || !password) { setError("Login va parolni kiriting!"); return; }
@@ -53,70 +55,48 @@ function LoginPage({ onLogin }) {
   return (
     <main className="min-h-screen bg-[#0a1628] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">🔐</span>
+            <MdLockOutline className="text-blue-400 text-3xl" />
           </div>
           <h1 className="text-white font-black text-2xl">Admin Panel</h1>
           <p className="text-blue-400/60 text-sm mt-1">WBK & BOKA</p>
         </div>
 
-        {/* Form */}
         <div className="bg-[#0d1f3c] rounded-2xl p-6 border border-blue-900">
           <div className="space-y-4">
-            {/* Login */}
             <div>
-              <label className="block text-blue-300 text-[11px] font-bold tracking-widest uppercase mb-1.5">
-                Login
-              </label>
-              <input
-                type="text"
-                value={login}
+              <label className="block text-blue-300 text-[11px] font-bold tracking-widest uppercase mb-1.5">Login</label>
+              <input type="text" value={login}
                 onChange={(e) => { setLogin(e.target.value); setError(""); }}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                 placeholder="Login..."
-                className="w-full bg-[#0a1628] border border-blue-800 rounded-xl px-4 py-3 text-white text-sm placeholder-blue-400/50 outline-none focus:border-blue-500 transition-colors"
-              />
+                className="w-full bg-[#0a1628] border border-blue-800 rounded-xl px-4 py-3 text-white text-sm placeholder-blue-400/50 outline-none focus:border-blue-500 transition-colors" />
             </div>
 
-            {/* Parol */}
             <div>
-              <label className="block text-blue-300 text-[11px] font-bold tracking-widest uppercase mb-1.5">
-                Parol
-              </label>
+              <label className="block text-blue-300 text-[11px] font-bold tracking-widest uppercase mb-1.5">Parol</label>
               <div className="relative">
-                <input
-                  type={showPass ? "text" : "password"}
-                  value={password}
+                <input type={showPass ? "text" : "password"} value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(""); }}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                   placeholder="Parol..."
-                  className="w-full bg-[#0a1628] border border-blue-800 rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-blue-400/50 outline-none focus:border-blue-500 transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 hover:text-white transition-colors text-lg"
-                >
-                  {showPass ? "🙈" : "👁"}
+                  className="w-full bg-[#0a1628] border border-blue-800 rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-blue-400/50 outline-none focus:border-blue-500 transition-colors" />
+                <button type="button" onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 hover:text-white transition-colors">
+                  {showPass ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
                 </button>
               </div>
             </div>
 
-            {/* Xato */}
             {error && (
-              <div className="bg-red-500/15 border border-red-500/30 rounded-xl px-4 py-2.5 text-red-400 text-xs font-bold">
-                ❌ {error}
+              <div className="bg-red-500/15 border border-red-500/30 rounded-xl px-4 py-2.5 text-red-400 text-xs font-bold flex items-center gap-2">
+                <MdErrorOutline size={16} />{error}
               </div>
             )}
 
-            {/* Kirish tugmasi */}
-            <button
-              onClick={handleLogin}
-              disabled={loading}
-              className="w-full py-3 bg-blue-500 hover:bg-blue-400 disabled:bg-blue-900 text-white font-black rounded-xl transition-all text-sm tracking-widest uppercase mt-2"
-            >
+            <button onClick={handleLogin} disabled={loading}
+              className="w-full py-3 bg-blue-500 hover:bg-blue-400 disabled:bg-blue-900 text-white font-black rounded-xl transition-all text-sm tracking-widest uppercase mt-2">
               {loading ? "Tekshirilmoqda..." : "Kirish →"}
             </button>
           </div>
@@ -137,19 +117,9 @@ function DatePicker({ value, onChange }) {
   const firstDay    = new Date(viewYear, viewMonth, 1).getDay();
   const startDay    = firstDay === 0 ? 6 : firstDay - 1;
 
-  const selectDay = (day) => {
-    onChange(`${day} ${MONTHS_UZ[viewMonth]} ${viewYear}`);
-    setOpen(false);
-  };
-
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
-    else setViewMonth(m => m - 1);
-  };
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
-    else setViewMonth(m => m + 1);
-  };
+  const selectDay = (day) => { onChange(`${day} ${MONTHS_UZ[viewMonth]} ${viewYear}`); setOpen(false); };
+  const prevMonth = () => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); } else setViewMonth(m => m - 1); };
+  const nextMonth = () => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); } else setViewMonth(m => m + 1); };
 
   const parts       = value ? value.split(" ") : [];
   const selDay      = parts[0] ? parseInt(parts[0]) : null;
@@ -161,7 +131,7 @@ function DatePicker({ value, onChange }) {
       <button type="button" onClick={() => setOpen(!open)}
         className="w-full bg-[#0a1628] border border-blue-800 rounded-xl px-4 py-2.5 text-left text-sm flex items-center justify-between outline-none focus:border-blue-500 transition-colors">
         <span className={value ? "text-white" : "text-blue-400"}>{value || "Sana tanlang..."}</span>
-        <span className="text-blue-400">📅</span>
+        <FiCalendar className="text-blue-400 w-4 h-4" />
       </button>
 
       {open && (
@@ -179,15 +149,13 @@ function DatePicker({ value, onChange }) {
           <div className="grid grid-cols-7 gap-0.5">
             {Array(startDay).fill(null).map((_, i) => <div key={`e${i}`} />)}
             {Array(daysInMonth).fill(null).map((_, i) => {
-              const day    = i + 1;
-              const isSel  = day === selDay && viewMonth === selMonthIdx && viewYear === selYear;
+              const day     = i + 1;
+              const isSel   = day === selDay && viewMonth === selMonthIdx && viewYear === selYear;
               const isToday = day === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
               return (
                 <button key={day} onClick={() => selectDay(day)}
                   className={`w-full aspect-square rounded-lg text-xs font-medium transition-all ${
-                    isSel    ? "bg-blue-500 text-white font-black" :
-                    isToday  ? "bg-blue-900 text-blue-300 font-bold" :
-                    "text-blue-200 hover:bg-blue-800"
+                    isSel ? "bg-blue-500 text-white font-black" : isToday ? "bg-blue-900 text-blue-300 font-bold" : "text-blue-200 hover:bg-blue-800"
                   }`}>
                   {day}
                 </button>
@@ -211,22 +179,12 @@ function ImagePositioner({ src, position, onChange }) {
   const startPos     = useRef({ x: 0, y: 0 });
   const startObjPos  = useRef({ x: 50, y: 50 });
 
-  const parsePos = (pos) => {
-    const [x, y] = pos.replace(/%/g, "").split(" ").map(Number);
-    return { x: isNaN(x) ? 50 : x, y: isNaN(y) ? 50 : y };
-  };
+  const parsePos = (pos) => { const [x, y] = pos.replace(/%/g, "").split(" ").map(Number); return { x: isNaN(x) ? 50 : x, y: isNaN(y) ? 50 : y }; };
   const clamp = (v, mn, mx) => Math.min(mx, Math.max(mn, v));
-  const getEventPos = (e) => e.touches
-    ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    : { x: e.clientX, y: e.clientY };
+  const getEventPos = (e) => e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
 
-  const onStart = (e) => {
-    e.preventDefault();
-    isDragging.current  = true;
-    startPos.current    = getEventPos(e);
-    startObjPos.current = parsePos(position);
-  };
-  const onMove = (e) => {
+  const onStart = (e) => { e.preventDefault(); isDragging.current = true; startPos.current = getEventPos(e); startObjPos.current = parsePos(position); };
+  const onMove  = (e) => {
     if (!isDragging.current || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const cur  = getEventPos(e);
@@ -246,8 +204,7 @@ function ImagePositioner({ src, position, onChange }) {
         className="relative h-36 sm:h-44 rounded-xl overflow-hidden border-2 border-blue-700 cursor-grab active:cursor-grabbing select-none"
         onMouseDown={onStart} onMouseMove={onMove} onMouseUp={onEnd} onMouseLeave={onEnd}
         onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}>
-        <img src={src} alt="pos" draggable={false}
-          className="w-full h-full object-cover pointer-events-none"
+        <img src={src} alt="pos" draggable={false} className="w-full h-full object-cover pointer-events-none"
           style={{ objectPosition: position }} />
         <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none">
           <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] px-3 py-1 rounded-full">
@@ -272,12 +229,7 @@ function AdminPanel() {
   const fileRef = useRef(null);
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-
-  const setCategory = (uzCat) => {
-    set("category_uz", uzCat);
-    set("category_en", CAT_MAP[uzCat]?.en || uzCat);
-    set("category_ru", CAT_MAP[uzCat]?.ru || uzCat);
-  };
+  const setCategory = (uzCat) => { set("category_uz", uzCat); set("category_en", CAT_MAP[uzCat]?.en || uzCat); set("category_ru", CAT_MAP[uzCat]?.ru || uzCat); };
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -331,7 +283,7 @@ function AdminPanel() {
   };
 
   const inp = "w-full bg-[#0a1628] border border-blue-800 rounded-xl px-4 py-2.5 text-white text-sm placeholder-blue-400/50 outline-none focus:border-blue-500 transition-colors";
-  const lbl = "block text-blue-300 text-[11px] font-bold tracking-widest uppercase mb-1.5";
+  const lbl = "block text-blue-300 text-[11px] font-bold tracking-widests uppercase mb-1.5";
 
   return (
     <main className="min-h-screen bg-[#0a1628] text-white px-4 sm:px-6 py-8 sm:py-10">
@@ -343,14 +295,17 @@ function AdminPanel() {
             <p className="text-blue-400 text-[11px] font-black tracking-[0.25em] uppercase mb-1">WBK & BOKA</p>
             <h1 className="text-2xl sm:text-3xl font-black">Admin Panel</h1>
           </div>
-          <div className="w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-xl">
-            🔐
+          <div className="w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+            <MdLockOutline className="text-blue-400 text-xl" />
           </div>
         </div>
 
         {/* Form */}
         <div className="bg-[#0d1f3c] rounded-2xl p-4 sm:p-6 border border-blue-900 mb-8">
-          <h2 className="text-base sm:text-lg font-bold mb-5">➕ Yangi yangilik</h2>
+          <h2 className="text-base sm:text-lg font-bold mb-5 flex items-center gap-2">
+            <MdAddCircleOutline className="text-blue-400 text-xl" />
+            Yangi yangilik
+          </h2>
 
           {/* Til */}
           <div className="flex gap-2 mb-5">
@@ -362,7 +317,6 @@ function AdminPanel() {
             ))}
           </div>
 
-          {/* Sarlavha va matn */}
           <div className="space-y-3 mb-5">
             <div>
               <label className={lbl}>Sarlavha ({tab}) *</label>
@@ -376,7 +330,6 @@ function AdminPanel() {
             </div>
           </div>
 
-          {/* Kategoriya, Sana, O'qish vaqti */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
             <div>
               <label className={lbl}>Kategoriya</label>
@@ -413,8 +366,11 @@ function AdminPanel() {
                   {!uploading && <p className="text-blue-400 text-xs">O'zgartirish uchun bosing</p>}
                 </div>
               ) : (
-                <div>
-                  <p className="text-3xl mb-2">{uploading ? "⏳" : "🖼️"}</p>
+                <div className="flex flex-col items-center">
+                  {uploading
+                    ? <MdHourglassEmpty className="text-blue-400 text-4xl mb-2" />
+                    : <MdImage className="text-blue-600 text-4xl mb-2" />
+                  }
                   <p className="text-blue-300 text-sm font-bold">{uploading ? "Yuklanmoqda..." : "Rasm tanlash"}</p>
                   <p className="text-blue-400/50 text-xs mt-1">JPG, PNG, WEBP — max 5MB</p>
                 </div>
@@ -433,31 +389,34 @@ function AdminPanel() {
               </div>
             )}
             {!uploading && uploadProgress === 100 && (
-              <p className="mt-1.5 text-green-400 text-xs font-bold">✅ Yuklandi!</p>
+              <p className="mt-1.5 text-green-400 text-xs font-bold flex items-center gap-1">
+                <MdCheckCircle className="text-green-400" /> Yuklandi!
+              </p>
             )}
           </div>
 
-          {/* Drag pozitsiya */}
           {form.img && !uploading && (
             <ImagePositioner src={form.img} position={form.imgPosition} onChange={(v) => set("imgPosition", v)} />
           )}
 
-          {/* Submit */}
           <button onClick={handleSubmit} disabled={loading || uploading}
             className="w-full py-3 bg-blue-500 hover:bg-blue-400 disabled:bg-blue-900 disabled:cursor-not-allowed text-white font-black rounded-xl transition-all text-sm tracking-widest uppercase">
-            {loading ? "Saqlanmoqda..." : uploading ? "Rasm yuklanmoqda..." : "✅ Yangilik qo'shish"}
+            {loading ? "Saqlanmoqda..." : uploading ? "Rasm yuklanmoqda..." : "Yangilik qo'shish"}
           </button>
 
           {success && (
-            <div className="mt-3 bg-green-500/20 border border-green-500/40 rounded-xl px-4 py-3 text-green-400 text-sm font-bold text-center">
-              ✅ Muvaffaqiyatli qo'shildi!
+            <div className="mt-3 bg-green-500/20 border border-green-500/40 rounded-xl px-4 py-3 text-green-400 text-sm font-bold flex items-center justify-center gap-2">
+              <MdCheckCircle className="text-green-400 text-lg" /> Muvaffaqiyatli qo'shildi!
             </div>
           )}
         </div>
 
         {/* Mavjud yangiliklar */}
         <div>
-          <h2 className="text-base sm:text-lg font-bold mb-4">📋 Yangiliklar ({newsList.length})</h2>
+          <h2 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
+            <MdList className="text-blue-400 text-xl" />
+            Yangiliklar ({newsList.length})
+          </h2>
           {newsList.length === 0 ? (
             <p className="text-blue-400/50 text-sm text-center py-10">Hozircha yangilik yo'q</p>
           ) : (
@@ -474,8 +433,11 @@ function AdminPanel() {
                     <p className="text-blue-400 text-[11px] mt-0.5">{item.category?.uz} • {item.date}</p>
                   </div>
                   <button onClick={() => handleDelete(item.id)} disabled={deleting === item.id}
-                    className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400 hover:text-red-300 flex items-center justify-center transition-all text-sm">
-                    {deleting === item.id ? "..." : "🗑"}
+                    className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400 hover:text-red-300 flex items-center justify-center transition-all">
+                    {deleting === item.id
+                      ? <span className="text-xs">...</span>
+                      : <MdDelete className="w-4 h-4" />
+                    }
                   </button>
                 </div>
               ))}
@@ -488,10 +450,8 @@ function AdminPanel() {
   );
 }
 
-/* ── Page entry ── */
 export default function AdminPage() {
   const [loggedIn, setLoggedIn] = useState(false);
-
   if (!loggedIn) return <LoginPage onLogin={() => setLoggedIn(true)} />;
   return <AdminPanel />;
 }
