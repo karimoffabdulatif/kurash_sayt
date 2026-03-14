@@ -4,22 +4,22 @@ import { useApp } from "../contex/AppContext";
 
 const slides = {
   uz: [
-    { title: "WBK & BOKA Rasmiy Sayti",       subtitle: "Dunyo Belbog'li Kurashi va Bel Olish Kurashi Asotsiyatsiyasi",  img: "/banner-1.jpg" },
-    { title: "Xalqaro Musobaqalar",            subtitle: "Dunyoning eng yaxshi kurashchilari bir maydonda.",               img: "/banner-2.png" },
-    { title: "Bizning Jamiyatga Qo'shiling",   subtitle: "Kurash sportini birga rivojlantiramiz.",                         img: "/banner-3.jpg" },
-    { title: "Yangiliklar va Tadbirl ar",      subtitle: "So'nggi xabarlar va turnirlardan boxabar bo'ling.",              img: "/banner-4.jpg" },
+    { title: "WBK & BOKA Rasmiy Sayti",       subtitle: "Dunyo Belbog'li Kurashi va Bel Olish Kurashi Asotsiyatsiyasi",  img: "/img-2.jpg" },
+    { title: "Xalqaro Musobaqalar",            subtitle: "Dunyoning eng yaxshi kurashchilari bir maydonda.",               img: "/img-3.jpg" },
+    { title: "Bizning Jamiyatga Qo'shiling",   subtitle: "Kurash sportini birga rivojlantiramiz.",                         img: "/img-6.jpg" },
+    { title: "Yangiliklar va Tadbirl ar",      subtitle: "So'nggi xabarlar va turnirlardan boxabar bo'ling.",              img: "/img-5.jpg" },
   ],
   en: [
-    { title: "Official WBK & BOKA Website",   subtitle: "World Kurash Belt Wrestling Association",                        img: "/banner-1.jpg" },
-    { title: "International Competitions",    subtitle: "The world's best wrestlers on one stage.",                        img: "/banner-2.png" },
-    { title: "Join Our Community",            subtitle: "Together we develop Kurash sport.",                               img: "/banner-3.jpg" },
-    { title: "News and Events",               subtitle: "Stay up to date with the latest news and tournaments.",           img: "/banner-4.jpg" },
+    { title: "Official WBK & BOKA Website",   subtitle: "World Kurash Belt Wrestling Association",                        img: "/img-2.jpg" },
+    { title: "International Competitions",    subtitle: "The world's best wrestlers on one stage.",                        img: "/img-3.jpg" },
+    { title: "Join Our Community",            subtitle: "Together we develop Kurash sport.",                               img: "/img-6.jpg" },
+    { title: "News and Events",               subtitle: "Stay up to date with the latest news and tournaments.",           img: "/img-5.jpg" },
   ],
   ru: [
-    { title: "Официальный сайт WBK & BOKA",  subtitle: "Всемирная Ассоциация Борьбы Кураш",                              img: "/banner-1.jpg" },
-    { title: "Международные соревнования",   subtitle: "Лучшие борцы мира на одной арене.",                               img: "/banner-2.png" },
-    { title: "Присоединяйтесь к нам",        subtitle: "Вместе развиваем кураш.",                                         img: "/banner-3.jpg" },
-    { title: "Новости и события",             subtitle: "Будьте в курсе последних новостей и турниров.",                   img: "/banner-4.jpg" },
+    { title: "Официальный сайт WBK & BOKA",  subtitle: "Всемирная Ассоциация Борьбы Кураш",                              img: "/img-2.jpg" },
+    { title: "Международные соревнования",   subtitle: "Лучшие борцы мира на одной арене.",                               img: "/img-3.jpg" },
+    { title: "Присоединяйтесь к нам",        subtitle: "Вместе развиваем кураш.",                                         img: "/img-6.jpg" },
+    { title: "Новости и события",             subtitle: "Будьте в курсе последних новостей и турниров.",                   img: "/img-5.jpg" },
   ],
 };
 

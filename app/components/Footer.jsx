@@ -206,16 +206,16 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] sm:text-[12px] text-white/60">
           <p className="text-center sm:text-left">
-            &copy; {new Date().getFullYear()} Belbogli Kurash Federatsiyasi. {T.copy[language]}
+            <Link href="/admin" className="text-white/60 hover:text-white/60 cursor-default">&copy;</Link> {new Date().getFullYear()} Belbogli Kurash Federatsiyasi. {T.copy[language]}
           </p>
           <div className="flex gap-3 sm:gap-4">
             <Link href="/privacy" className="hover:text-white transition-colors">{T.privacy[language]}</Link>
             <Link href="/terms" className="hover:text-white transition-colors">{T.terms[language]}</Link>
           </div>
 
-          <Link href="/admin">
-            <button>Admin</button>
-          </Link>        </div>
+          <Link href="/admin" className="text-white/10 hover:text-white/30 transition-colors text-[10px] select-none ml-2">
+            ©
+          </Link>   </div>
       </div>
     </footer>
   );
