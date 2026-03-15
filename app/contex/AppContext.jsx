@@ -1,7 +1,13 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { getNews } from "../lib/newsService";
+import { db } from "../lib/firebase";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+} from "firebase/firestore";
 
 const AppContext = createContext(null);
 
@@ -11,19 +17,28 @@ export function AppProvider({ children }) {
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading]   = useState(true);
 
-  // Firebase dan yangiliklar yuklash
+  // Real-time listener — Firestore o'zgarganda avtomatik yangilanadi
   useEffect(() => {
-    async function fetchNews() {
-      try {
-        const data = await getNews();
+    const q = query(
+      collection(db, "news"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
         setNewsList(data);
-      } catch (e) {
-        console.error("Yangiliklar yuklanmadi:", e);
-      } finally {
+        setLoading(false);
+      },
+      (error) => {
+        console.error("onSnapshot error:", error);
         setLoading(false);
       }
-    }
-    fetchNews();
+    );
+
+    // Komponent unmount bo'lganda listener o'chiriladi
+    return () => unsubscribe();
   }, []);
 
   // Dark mode
@@ -40,10 +55,10 @@ export function AppProvider({ children }) {
     }
   }, [darkMode]);
 
-  // Yangilik qo'shilgandan keyin qayta yuklash
+  // Manual refresh (admin panel uchun)
   const refreshNews = async () => {
-    const data = await getNews();
-    setNewsList(data);
+    // onSnapshot avtomatik yangilaydi, bu funksiya endi kerak emas
+    // Lekin admin panel ishlatib qolishi uchun saqlaymiz
   };
 
   return (
