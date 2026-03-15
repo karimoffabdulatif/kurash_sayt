@@ -10,26 +10,17 @@ const ADMIN_LOGIN    = process.env.NEXT_PUBLIC_ADMIN_LOGIN    || "admin";
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "12345";
 
 const IMGBB_API_KEY = "67a7613cbf54d18cb585ee96b0a8240b";
-const CATEGORIES = ["Musobaqa", "Rekord", "Tashkilot", "Intervyu", "Turnir", "Xalqaro"];
+
 const MONTHS_UZ  = ["Yanvar","Fevral","Mart","Aprel","May","Iyun","Iyul","Avgust","Sentabr","Oktabr","Noyabr","Dekabr"];
 
 const EMPTY = {
   title_uz: "", title_en: "", title_ru: "",
   excerpt_uz: "", excerpt_en: "", excerpt_ru: "",
-  category_uz: "Musobaqa", category_en: "Tournament", category_ru: "Турнир",
   img: "", imgPosition: "50% 50%",
   date_uz: "", date_en: "", date_ru: "",
-  readTime_uz: "3 daq", readTime_en: "3 min", readTime_ru: "3 мин",
 };
 
-const CAT_MAP = {
-  "Musobaqa":  { en: "Tournament",    ru: "Турнир"        },
-  "Rekord":    { en: "Record",        ru: "Рекорд"        },
-  "Tashkilot": { en: "Organization",  ru: "Организация"   },
-  "Intervyu":  { en: "Interview",     ru: "Интервью"      },
-  "Turnir":    { en: "Tournament",    ru: "Турнир"        },
-  "Xalqaro":   { en: "International", ru: "Международный" },
-};
+
 
 /* ── Login ── */
 function LoginPage({ onLogin }) {
@@ -229,7 +220,7 @@ function AdminPanel() {
   const fileRef = useRef(null);
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-  const setCategory = (uzCat) => { set("category_uz", uzCat); set("category_en", CAT_MAP[uzCat]?.en || uzCat); set("category_ru", CAT_MAP[uzCat]?.ru || uzCat); };
+
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -255,17 +246,21 @@ function AdminPanel() {
     }
     setLoading(true);
     try {
+      const now = new Date();
+      const minutesSince = (target) => {
+        const diff = Math.floor((target - now) / 60000);
+        return diff;
+      };
       await addNewsToDb({
         title:       { uz: form.title_uz,    en: form.title_en,    ru: form.title_ru    },
         excerpt:     { uz: form.excerpt_uz,  en: form.excerpt_en,  ru: form.excerpt_ru  },
-        category:    { uz: form.category_uz, en: form.category_en, ru: form.category_ru },
-        readTime:    { uz: form.readTime_uz, en: form.readTime_en, ru: form.readTime_ru },
         img:         form.img,
         imgPosition: form.imgPosition,
         date:        form.date_uz || form.date_en || form.date_ru,
         date_uz:     form.date_uz,
         date_en:     form.date_en,
         date_ru:     form.date_ru,
+        postedAt:    now.toISOString(),
       });
       await refreshNews();
       setForm(EMPTY); setUploadProgress(0);
@@ -330,24 +325,12 @@ function AdminPanel() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-            <div>
-              <label className={lbl}>Kategoriya</label>
-              <select className={inp + " cursor-pointer"} value={form.category_uz} onChange={(e) => setCategory(e.target.value)}>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
+          <div className="grid grid-cols-1 gap-3 mb-5">
             <div>
               <label className={lbl}>Sana ({tab}) *</label>
               <DatePicker value={form[`date_${tab}`]} onChange={(v) => set(`date_${tab}`, v)} />
             </div>
-            <div className="sm:col-span-2">
-              <label className={lbl}>O'qish vaqti ({tab})</label>
-              <input className={inp}
-                placeholder={tab === "uz" ? "3 daq" : tab === "en" ? "3 min" : "3 мин"}
-                value={form[`readTime_${tab}`]}
-                onChange={(e) => set(`readTime_${tab}`, e.target.value)} />
-            </div>
+
           </div>
 
           {/* Rasm */}

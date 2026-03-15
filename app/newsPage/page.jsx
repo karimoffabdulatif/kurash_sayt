@@ -1,4 +1,5 @@
 "use client";
+import { getReadTime } from '../lib/timeUtils';
 
 import { useState, useRef, useEffect } from "react";
 import { useApp } from "../contex/AppContext";
@@ -14,6 +15,7 @@ const CATS = {
 };
 
 const T = {
+  label:       { uz: "Rasmiy Yangiliklar",            en: "Official News",             ru: "Официальные новости"      },
   heading:     { uz: "Yangiliklar",                    en: "News",                      ru: "Новости"                  },
   empty:       { uz: "Bu kategoriyada yangilik yo'q.", en: "No news in this category.", ru: "Нет новостей в этой категории." },
   featured:    { uz: "Asosiy yangilik",                en: "Featured",                  ru: "Главное"                  },
@@ -135,7 +137,7 @@ function FeaturedCard({ item, darkMode, language }) {
           <div className="flex items-center gap-2 mb-3 flex-wrap">
             <span className={`${metaC} text-xs font-medium`}>{item[`date_${language}`] || item.date}</span>
             <span className={darkMode ? "text-blue-700" : "text-gray-200"}>•</span>
-            <span className={`${darkMode ? "text-blue-400/70" : "text-slate-400"} text-xs`}>{item.readTime[language]}</span>
+            <span className={`${darkMode ? "text-blue-400/70" : "text-slate-400"} text-xs`}>{getReadTime(item.postedAt, language)}</span>
             <span className={darkMode ? "text-blue-700" : "text-gray-200"}>•</span>
             <ViewBadge views={item.views} darkMode={darkMode} />
           </div>
@@ -219,7 +221,7 @@ function NewsCard({ item, index, darkMode, language }) {
         <div className="flex items-center gap-2 mb-2.5 flex-wrap">
           <span className={`${metaC} text-[11px] font-medium`}>{item[`date_${language}`] || item.date}</span>
           <span className={darkMode ? "text-blue-700" : "text-gray-200"}>•</span>
-          <span className={`${darkMode ? "text-blue-400/60" : "text-slate-400"} text-[11px]`}>{item.readTime[language]}</span>
+          <span className={`${darkMode ? "text-blue-400/60" : "text-slate-400"} text-[11px]`}>{getReadTime(item.postedAt, language)}</span>
           <span className={darkMode ? "text-blue-700" : "text-gray-200"}>•</span>
           <ViewBadge views={item.views} darkMode={darkMode} small />
         </div>
@@ -283,14 +285,17 @@ export default function NewsPage() {
         {/* Header */}
         <div
           ref={headerRef}
-          className="mb-10 mt-12 sm:mb-20"
+          className="mb-10 sm:mb-12"
           style={{
             opacity: iv ? 1 : 0,
             transform: iv ? "none" : "translateY(16px)",
             transition: "opacity .6s ease, transform .6s ease",
           }}
         >
-         
+          <p className={`${subC} text-[11px] font-semibold tracking-[0.25em] uppercase mb-3 flex items-center gap-2`}>
+            <span className="w-6 h-px bg-current" />
+            {T.label[language]}
+          </p>
           <h1 className={`${headingC} font-black text-[32px] sm:text-[44px] lg:text-[56px] leading-tight tracking-tight`}>
             {T.heading[language]}
           </h1>
