@@ -9,10 +9,9 @@ import { useApp } from "../contex/AppContext";
 
 const links = [
   { href: "/",          num: "01", label: { en: "Home",      ru: "Главная",   uz: "Bosh sahifa"   } },
-  { href: "/about",     num: "02", label: { en: "About",     ru: "О нас",     uz: "Biz haqimizda" } },
-  { href: "/contact",   num: "03", label: { en: "Contact",   ru: "Контакты",  uz: "Kontaktlar"    } },
+  { href: "/newsPage",  num: "02", label: { en: "News",      ru: "Новости",   uz: "Yangiliklar"   } },
+  { href: "/about",     num: "03", label: { en: "About",     ru: "О нас",     uz: "Biz haqimizda" } },
   { href: "/directing", num: "04", label: { en: "Officials", ru: "Официальные лица", uz: "Rasmiylar"  } },
-  { href: "/newsPage",  num: "05", label: { en: "News",      ru: "Новости",   uz: "Yangiliklar"   } },
 ];
 
 const LANGS = ["en", "ru", "uz"];
