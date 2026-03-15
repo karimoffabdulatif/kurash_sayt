@@ -119,7 +119,7 @@ function FeaturedCard({ item, darkMode, language }) {
           }} />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent" />
         <span className="absolute top-4 left-4 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm">
-          {item.category[language]}
+          {item.category?.[language] ?? ""}
         </span>
         <span className="absolute bottom-4 left-4 bg-white/15 backdrop-blur-md border border-white/20 text-white text-[9px] font-medium tracking-widest uppercase px-3 py-1.5 rounded-sm flex items-center gap-1.5">
           <HiStar className="w-3 h-3 text-yellow-300" />
@@ -208,7 +208,7 @@ function NewsCard({ item, index, darkMode, language }) {
           }} />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/50 to-transparent" />
         <span className="absolute top-3 left-3 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-sm">
-          {item.category[language]}
+          {item.category?.[language] ?? ""}
         </span>
         <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
           <FiEye className="w-3 h-3" />
@@ -264,7 +264,7 @@ export default function NewsPage() {
   const allCats  = CATS[language];
   const filtered = cat === 0
     ? newsList
-    : newsList.filter((n) => n.category.uz === CATS.uz[cat]);
+    : newsList.filter((n) => n.category?.uz === CATS.uz[cat]);
 
   const featured = filtered[0];
   const rest     = filtered.slice(1);
