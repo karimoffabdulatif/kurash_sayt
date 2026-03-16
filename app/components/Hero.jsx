@@ -4,21 +4,21 @@ import { useApp } from "../contex/AppContext";
 
 const slides = {
   uz: [
-    { title: "WBK & BOKA Rasmiy Sayti",       subtitle: "Dunyo Belbog'li Kurashi va Bel Olish Kurashi Asotsiyatsiyasi",  img: "/img-2.jpg" },
-    { title: "Xalqaro Musobaqalar",            subtitle: "Dunyoning eng yaxshi kurashchilari bir maydonda.",               img: "/img-3.jpg" },
-    { title: "Bizning Jamiyatga Qo'shiling",   subtitle: "Kurash sportini birga rivojlantiramiz.",                         img: "/img-6.jpg" },
-    { title: "Yangiliklar va Tadbirl ar",      subtitle: "So'nggi xabarlar va turnirlardan boxabar bo'ling.",              img: "/img-5.jpg" },
+    { title: "WBK & BOKA Rasmiy Sayti",       subtitle: "Butunjahon Belbog‘li Kurash va Bel Olish Kurash Assotsiatsiyasi",  img: "/img-2.jpg" },
+    { title: "Xalqaro Musobaqalar",            subtitle: "Dunyoning eng yaxshi belbog' kurashchilari bir maydonda.",               img: "/img-3.jpg" },
+    { title: "Bizning Sahifamizga Obuna bo'ling",   subtitle: "Belbog'li kurash sportini birga rivojlantiramiz.",                         img: "/img-6.jpg" },
+    { title: "Yangiliklar va Tadbirlar",      subtitle: "So'nggi xabarlar va turnirlardan boxabar bo'ling.",              img: "/img-5.jpg" },
   ],
   en: [
-    { title: "Official WBK & BOKA Website",   subtitle: "World Kurash Belt Wrestling Association",                        img: "/img-2.jpg" },
-    { title: "International Competitions",    subtitle: "The world's best wrestlers on one stage.",                        img: "/img-3.jpg" },
-    { title: "Join Our Community",            subtitle: "Together we develop Kurash sport.",                               img: "/img-6.jpg" },
+    { title: "Official WBK & BOKA Website",   subtitle: "World Belt Wrestling and Bel Olish Wrestling Association",                        img: "/img-2.jpg" },
+    { title: "International Competitions",    subtitle: "The world's best belt wrestlers in one arena.",                        img: "/img-3.jpg" },
+    { title: "Subscribe to our page",            subtitle: "Developing belt wrestling together.",                               img: "/img-6.jpg" },
     { title: "News and Events",               subtitle: "Stay up to date with the latest news and tournaments.",           img: "/img-5.jpg" },
   ],
   ru: [
-    { title: "Официальный сайт WBK & BOKA",  subtitle: "Всемирная Ассоциация Борьбы Кураш",                              img: "/img-2.jpg" },
-    { title: "Международные соревнования",   subtitle: "Лучшие борцы мира на одной арене.",                               img: "/img-3.jpg" },
-    { title: "Присоединяйтесь к нам",        subtitle: "Вместе развиваем кураш.",                                         img: "/img-6.jpg" },
+    { title: "Официальный сайт WBK & BOKA",  subtitle: "Всемирная ассоциация борьбы на поясах и борьбы «бел олиш»",                              img: "/img-2.jpg" },
+    { title: "Международные соревнования",   subtitle: "Лучшие борцы по поясной борьбе мира на одной арене",                               img: "/img-3.jpg" },
+    { title: "Подпишитесь на нашу страницу",        subtitle: "Развиваем борьбу на поясах вместе.",                                         img: "/img-6.jpg" },
     { title: "Новости и события",             subtitle: "Будьте в курсе последних новостей и турниров.",                   img: "/img-5.jpg" },
   ],
 };
@@ -69,13 +69,10 @@ export default function Hero() {
           {/* Content */}
           <div className="relative h-full w-full flex items-center justify-center px-4 sm:px-6">
             <div className="text-center text-white max-w-3xl z-20">
-              <p className="text-[11px] sm:text-xs tracking-[4px] sm:tracking-[6px] uppercase text-blue-300 mb-3 sm:mb-4 font-medium">
-                WBK & BOKA
-              </p>
+             
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 sm:mb-5 leading-tight tracking-tight">
                 {slide.title}
               </h1>
-              <div className="w-12 h-0.5 bg-blue-400 mx-auto mb-4 sm:mb-5" />
               <p className="text-base sm:text-lg md:text-xl text-white/80 leading-relaxed">
                 {slide.subtitle}
               </p>
@@ -99,7 +96,6 @@ export default function Hero() {
         ))}
       </div>
 
-      {/* Prev / Next arrows */}
       
 
       {/* Progress bar */}
