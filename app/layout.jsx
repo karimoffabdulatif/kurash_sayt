@@ -32,7 +32,7 @@ export const metadata = {
     description: "Xalqaro belbog'li kurash va bel olish kurash musobaqalari, yangiliklar va rasmiy ma'lumotlar.",
     url: "https://www.wbkboka.org",
     siteName: "WBK & BOKA",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "WBK & BOKA" }],
+    images: [{ url: "https://www.wbkboka.org/og-image.jpg", width: 1200, height: 630, alt: "WBK & BOKA" }],
     locale: "uz_UZ",
     type: "website",
   },
@@ -40,7 +40,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "WBK & BOKA — Butunjahon Belbog'li Kurash Assotsiatsiyasi",
     description: "Xalqaro belbog'li kurash va bel olish kurash musobaqalari.",
-    images: ["/og-image.jpg"],
+    images: ["https://www.wbkboka.org/og-image.jpg"],
   },
   icons: {
     icon: [
@@ -69,6 +69,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="uz">
+      <head>
+        <meta property="og:image" content="https://www.wbkboka.org/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:alt" content="WBK & BOKA" />
+        <meta name="twitter:image" content="https://www.wbkboka.org/og-image.jpg" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
         <ClientLayout>{children}</ClientLayout>
       </body>
