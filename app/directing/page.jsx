@@ -81,6 +81,71 @@ function Reveal({ children, className = "", delay = 0 }) {
   );
 }
 
+/* ── Loader (Home page bilan bir xil stil) ── */
+function Loader() {
+  return (
+    <div
+      style={{ zIndex: 99999 }}
+      className="fixed inset-0 flex flex-col items-center justify-center bg-white"
+    >
+      <div className="relative flex items-center justify-center">
+
+        {/* Shadow doirasi - faqat tashqi chet */}
+        <div
+          style={{
+            width: "clamp(160px, 35vw, 280px)",
+            height: "clamp(160px, 35vw, 280px)",
+            borderRadius: "50%",
+            position: "absolute",
+            boxShadow: "0 0 0 3px #60a5fa, 0 0 16px 4px #3b82f6",
+            zIndex: 20,
+          }}
+        />
+
+        {/* Aylanuvchi tashqi ramka */}
+        <div
+          style={{
+            width: "clamp(160px, 35vw, 280px)",
+            height: "clamp(160px, 35vw, 280px)",
+            backgroundImage: "url('/ramka.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            borderRadius: "50%",
+            position: "absolute",
+            animation: "spin 10s linear infinite",
+            zIndex: 21,
+          }}
+        />
+
+        {/* O'rtadagi statik rasm */}
+        <div
+          style={{
+            width: "clamp(110px, 24vw, 210px)",
+            height: "clamp(110px, 24vw, 210px)",
+            borderRadius: "50%",
+            overflow: "hidden",
+            position: "relative",
+            zIndex: 22,
+          }}
+        >
+          <img
+            src="/orta.png"
+            alt="loader"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 /* ── Featured Hero ── */
 function FeaturedCard({ member, darkMode, language }) {
   const [hov, setHov] = useState(false);
@@ -97,7 +162,7 @@ function FeaturedCard({ member, darkMode, language }) {
         className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border ${borderC} ${cardBg} transition-all duration-500`}
         style={{ boxShadow: hov ? "0 24px 64px rgba(15,42,94,0.16)" : "0 6px 24px rgba(15,42,94,0.07)" }}
       >
-        {/* MOBILE: Rasm ustida matn (overlay) */}
+        {/* MOBILE */}
         <div className="lg:hidden">
           <div className="relative overflow-hidden" style={{ height: "320px" }}>
             {member.img ? (
@@ -108,17 +173,12 @@ function FeaturedCard({ member, darkMode, language }) {
               <div className="absolute inset-0"
                 style={{ background: `linear-gradient(150deg, ${member.color}, #0f172a)` }} />
             )}
-            {/* Gradient overlay pastdan */}
             <div className="absolute inset-0"
               style={{ background: "linear-gradient(to top, rgba(10,22,40,0.96) 0%, rgba(10,22,40,0.5) 50%, rgba(10,22,40,0.1) 100%)" }} />
-
-            {/* Badge */}
             <div className="absolute top-4 left-4 flex items-center gap-2">
               <span className="w-6 h-px bg-blue-400" />
               <span className="text-blue-400 text-[10px] font-black tracking-[0.3em]">01</span>
             </div>
-
-            {/* Matn overlay — pastda */}
             <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
               <p className="text-blue-400 text-[10px] font-black tracking-[0.25em] uppercase mb-2">
                 {member.role[language]}
@@ -134,9 +194,8 @@ function FeaturedCard({ member, darkMode, language }) {
           </div>
         </div>
 
-        {/* DESKTOP: Yonma-yon */}
+        {/* DESKTOP */}
         <div className="hidden lg:grid lg:grid-cols-2">
-          {/* Rasm */}
           <div className="relative overflow-hidden" style={{ minHeight: "460px" }}>
             {member.img ? (
               <img src={member.img} alt={member.name[language]}
@@ -155,8 +214,6 @@ function FeaturedCard({ member, darkMode, language }) {
               <span className="text-blue-400 text-[11px] font-black tracking-[0.3em]">01</span>
             </div>
           </div>
-
-          {/* Matn */}
           <div className="relative flex flex-col justify-center px-10 xl:px-14 py-12">
             <div className="absolute top-0 left-0 w-px h-full opacity-15"
               style={{ background: "linear-gradient(to bottom, transparent, #60a5fa, transparent)" }} />
@@ -199,7 +256,6 @@ function SmallCard({ member, index, darkMode, language, delay }) {
           transition: "box-shadow .4s ease",
         }}
       >
-        {/* Fon */}
         {member.img ? (
           <img src={member.img} alt={member.name[language]}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
@@ -213,26 +269,18 @@ function SmallCard({ member, index, darkMode, language, delay }) {
               style={{ fontSize: "clamp(48px, 10vw, 72px)", opacity: 0.1 }}>{member.initials}</div>
           </div>
         )}
-
-        {/* Overlay */}
         <div className="absolute inset-0 transition-opacity duration-500"
           style={{
             background: "linear-gradient(to top, rgba(8,18,36,0.97) 0%, rgba(8,18,36,0.55) 50%, rgba(8,18,36,0.08) 100%)",
             opacity: hov ? 1 : 0.82,
           }} />
-
-        {/* Raqam */}
         <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex items-center gap-1.5 z-10">
           <span className="w-4 h-px bg-blue-400/70" />
           <span className="text-blue-400/70 text-[9px] sm:text-[10px] font-black tracking-[0.25em]">{num}</span>
         </div>
-
-        {/* Davlat bayrog'i */}
         {member.country && (
           <span className="absolute top-3 right-3 sm:top-4 sm:right-4 text-base sm:text-lg z-10">{member.country}</span>
         )}
-
-        {/* Matn pastda */}
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 z-10 transition-transform duration-400"
           style={{ transform: hov ? "translateY(-3px)" : "translateY(0)" }}>
           <div className="flex items-center gap-2 mb-1.5">
@@ -257,6 +305,23 @@ function SmallCard({ member, index, darkMode, language, delay }) {
 
 export default function DirectingPage() {
   const { darkMode, language } = useApp();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (loading) {
+      document.body.style.overflow = "hidden";
+    }
+
+    const timer = setTimeout(() => {
+      setLoading(false);
+      document.body.style.overflow = "";
+    }, 2500);
+
+    return () => {
+      clearTimeout(timer);
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   const bg     = darkMode ? "bg-[#0a1628]"    : "bg-[#f8f9fc]";
   const titleC = darkMode ? "text-white"       : "text-[#0f2a5e]";
@@ -267,61 +332,58 @@ export default function DirectingPage() {
   const rest     = MEMBERS.filter(m => !m.featured);
 
   return (
-    <main className={`${bg} min-h-screen transition-colors duration-300`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 pt-20 sm:pt-24 lg:pt-28 pb-14 sm:pb-20">
+    <>
+      {loading && <Loader />}
 
-        {/* ── Header ── */}
-        <Reveal className="mb-8 sm:mb-12 lg:mb-16">
-          {/* Mobile: vertikal, Desktop: yonma-yon */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-6">
-            <div>
-              <p className={`${textC} text-[10px] sm:text-[11px] font-bold tracking-[0.3em] uppercase mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3`}>
-                <span className="w-6 sm:w-8 h-px bg-current" />WBK & BOKA
+      <main className={`${bg} min-h-screen transition-colors duration-300`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 pt-20 sm:pt-24 lg:pt-28 pb-14 sm:pb-20">
+
+          {/* ── Header ── */}
+          <Reveal className="mb-8 sm:mb-12 lg:mb-16">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-6">
+              <div>
+                <p className={`${textC} text-[10px] sm:text-[11px] font-bold tracking-[0.3em] uppercase mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3`}>
+                  <span className="w-6 sm:w-8 h-px bg-current" />WBK & BOKA
+                </p>
+                <h1 className={`${titleC} font-black leading-none tracking-tight`}
+                  style={{ fontSize: "clamp(26px, 7vw, 60px)" }}>
+                  {T.title[language]}
+                </h1>
+              </div>
+              <p className={`${textC} text-[11px] sm:text-xs max-w-[220px] sm:max-w-xs sm:text-right leading-relaxed hidden sm:block`}>
+                {T.sub[language]}
               </p>
-              <h1 className={`${titleC} font-black leading-none tracking-tight`}
-                style={{ fontSize: "clamp(26px, 7vw, 60px)" }}>
-                {T.title[language]}
-              </h1>
             </div>
-            <p className={`${textC} text-[11px] sm:text-xs max-w-[220px] sm:max-w-xs sm:text-right leading-relaxed hidden sm:block`}>
-              {T.sub[language]}
-            </p>
+            <div className="flex items-center gap-2 sm:gap-3 mt-4 sm:mt-6">
+              <div className={`h-px flex-1 ${divC}`} />
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-400" />
+              <div className={`h-px w-8 sm:w-12 ${divC}`} />
+            </div>
+          </Reveal>
+
+          {/* ── Featured ── */}
+          {featured && (
+            <div className="mb-4 sm:mb-6">
+              <FeaturedCard member={featured} darkMode={darkMode} language={language} />
+            </div>
+          )}
+
+          {/* ── Grid ── */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+            {rest.map((member, i) => (
+              <SmallCard
+                key={member.id}
+                member={member}
+                index={i}
+                darkMode={darkMode}
+                language={language}
+                delay={i * 0.05}
+              />
+            ))}
           </div>
 
-          {/* Divider */}
-          <div className="flex items-center gap-2 sm:gap-3 mt-4 sm:mt-6">
-            <div className={`h-px flex-1 ${divC}`} />
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-400" />
-            <div className={`h-px w-8 sm:w-12 ${divC}`} />
-          </div>
-        </Reveal>
-
-        {/* ── Featured ── */}
-        {featured && (
-          <div className="mb-4 sm:mb-6">
-            <FeaturedCard member={featured} darkMode={darkMode} language={language} />
-          </div>
-        )}
-
-        {/* ── Grid ──
-            Mobile:  2 ustun
-            Tablet:  2 ustun (sm)
-            Desktop: 4 ustun (lg)
-        */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          {rest.map((member, i) => (
-            <SmallCard
-              key={member.id}
-              member={member}
-              index={i}
-              darkMode={darkMode}
-              language={language}
-              delay={i * 0.05}
-            />
-          ))}
         </div>
-
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

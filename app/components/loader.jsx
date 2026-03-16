@@ -1,11 +1,14 @@
 "use client";
 
-export default function Loading() {
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center">
-      <div className="relative flex items-center justify-center" style={{ width: "180px", height: "180px" }}>
+import { useRef, useEffect, useState } from "react";
+import { useApp } from "../contex/AppContext";
 
-        {/* Aylanuvchi ramka — ko'k yozuv */}
+// ... (MEMBERS va T o'zgarishsiz qoladi)
+
+function Loader() {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
+      <div className="relative flex items-center justify-center" style={{ width: "180px", height: "180px" }}>
         <img
           src="/ramka.png"
           alt=""
@@ -17,8 +20,6 @@ export default function Loading() {
             zIndex: 20,
           }}
         />
-
-        {/* Statik o'rta — globus + yulduzlar */}
         <img
           src="/orta.png"
           alt="loader"
@@ -31,17 +32,10 @@ export default function Loading() {
           }}
         />
       </div>
-
-      {/* Yuklanmoqda matni */}
-
       <style>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.3; }
         }
       `}</style>
     </div>

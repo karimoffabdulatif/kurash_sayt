@@ -15,7 +15,6 @@ const CATS = {
 };
 
 const T = {
-  label:       { uz: "Rasmiy Yangiliklar",            en: "Official News",             ru: "Официальные новости"      },
   heading:     { uz: "Yangiliklar",                    en: "News",                      ru: "Новости"                  },
   empty:       { uz: "Bu kategoriyada yangilik yo'q.", en: "No news in this category.", ru: "Нет новостей в этой категории." },
   featured:    { uz: "Asosiy yangilik",                en: "Featured",                  ru: "Главное"                  },
@@ -71,6 +70,71 @@ function ViewBadge({ views, darkMode, small = false }) {
       <FiEye className={small ? "w-3 h-3" : "w-3.5 h-3.5"} />
       {formatted}
     </span>
+  );
+}
+
+/* ── Loader (Home page bilan bir xil stil) ── */
+function Loader() {
+  return (
+    <div
+      style={{ zIndex: 99999 }}
+      className="fixed inset-0 flex flex-col items-center justify-center bg-white"
+    >
+      <div className="relative flex items-center justify-center">
+
+        {/* Shadow doirasi */}
+        <div
+          style={{
+            width: "clamp(160px, 35vw, 280px)",
+            height: "clamp(160px, 35vw, 280px)",
+            borderRadius: "50%",
+            position: "absolute",
+            boxShadow: "0 0 0 3px #60a5fa, 0 0 16px 4px #3b82f6",
+            zIndex: 20,
+          }}
+        />
+
+        {/* Aylanuvchi tashqi ramka */}
+        <div
+          style={{
+            width: "clamp(160px, 35vw, 280px)",
+            height: "clamp(160px, 35vw, 280px)",
+            backgroundImage: "url('/ramka.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            borderRadius: "50%",
+            position: "absolute",
+            animation: "spin 10s linear infinite",
+            zIndex: 21,
+          }}
+        />
+
+        {/* O'rtadagi statik rasm */}
+        <div
+          style={{
+            width: "clamp(110px, 24vw, 210px)",
+            height: "clamp(110px, 24vw, 210px)",
+            borderRadius: "50%",
+            overflow: "hidden",
+            position: "relative",
+            zIndex: 22,
+          }}
+        >
+          <img
+            src="/orta.png"
+            alt="loader"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -175,7 +239,6 @@ function NewsCard({ item, index, darkMode, language }) {
   const textC   = darkMode ? "text-blue-200/60" : "text-slate-400";
   const metaC   = darkMode ? "text-blue-400"    : "text-blue-500";
   const borderC = darkMode ? "border-blue-900"  : "border-gray-100";
-  const dividerC = darkMode ? "bg-blue-900"     : "bg-gray-100";
 
   const setRefs = (el) => {
     revealRef.current = el;
@@ -260,6 +323,23 @@ export default function NewsPage() {
   const headerRef = useRef(null);
   const iv = useInView(headerRef);
   const [cat, setCat] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (loading) {
+      document.body.style.overflow = "hidden";
+    }
+
+    const timer = setTimeout(() => {
+      setLoading(false);
+      document.body.style.overflow = "";
+    }, 2500);
+
+    return () => {
+      clearTimeout(timer);
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   const allCats  = CATS[language];
   const filtered = cat === 0
@@ -279,96 +359,98 @@ export default function NewsPage() {
     : "bg-transparent text-slate-500 border-gray-200 hover:border-[#0f2a5e] hover:text-[#0f2a5e]";
 
   return (
-    <section className={`${bg} min-h-screen transition-colors duration-300`}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16">
+    <>
+      {loading && <Loader />}
 
-        {/* Header */}
-        <div
-          ref={headerRef}
-          className="mb-10 sm:mb-12"
-          style={{
-            opacity: iv ? 1 : 0,
-            transform: iv ? "none" : "translateY(16px)",
-            transition: "opacity .6s ease, transform .6s ease",
-          }}
-        >
-          <p className={`${subC} text-[11px] font-semibold tracking-[0.25em] uppercase mb-3 flex items-center gap-2`}>
-            <span className="w-6 h-px bg-current" />
-            {T.label[language]}
-          </p>
-          <h1 className={`${headingC} font-black text-[32px] sm:text-[44px] lg:text-[56px] leading-tight tracking-tight`}>
-            {T.heading[language]}
-          </h1>
-        </div>
+      <section className={`${bg} min-h-screen transition-colors duration-300`}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-16 lg:py-24">
 
-        {/* Category filter */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {allCats.map((c, i) => (
-            <button
-              key={i}
-              onClick={() => setCat(i)}
-              className={`text-[11px] font-semibold tracking-wide px-4 py-1.5 rounded-full border transition-all duration-200 ${
-                cat === i ? filterActive : filterInactive
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-
-        <div className={`h-px ${dividerC} mb-10`} />
-
-        {/* Cards */}
-        {filtered.length === 0 ? (
-          <div className={`text-center py-24 ${darkMode ? "text-blue-400/40" : "text-slate-400"} text-lg`}>
-            {T.empty[language]}
-          </div>
-        ) : (
-          <>
-            {featured && (
-              <div className="mb-6">
-                <FeaturedCard item={featured} darkMode={darkMode} language={language} />
-              </div>
-            )}
-            {rest.length > 0 && (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {rest.map((item, i) => (
-                  <NewsCard key={item.id} item={item} index={i} darkMode={darkMode} language={language} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Newsletter */}
-        <div className={`mt-16 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 border ${
-          darkMode ? "bg-[#0d1f3c] border-blue-900" : "bg-white border-gray-100"
-        }`}>
-          <div>
-            <p className={`${subC} text-[11px] font-semibold tracking-[0.2em] uppercase mb-1`}>
-              {T.subTitle[language]}
+          {/* Header */}
+          <div
+            ref={headerRef}
+            className="mb-10 sm:mb-12"
+            style={{
+              opacity: iv ? 1 : 0,
+              transform: iv ? "none" : "translateY(16px)",
+              transition: "opacity .6s ease, transform .6s ease",
+            }}
+          >
+            <p className={`${subC} text-[11px] font-semibold tracking-[0.25em] uppercase mb-3 flex items-center gap-2`}>
             </p>
-            <h3 className={`${headingC} font-bold text-lg sm:text-xl`}>
-              {T.newsletter[language]}
-            </h3>
+            <h1 className={`${headingC} font-black text-[32px] sm:text-[44px] lg:text-[56px] leading-tight tracking-tight`}>
+              {T.heading[language]}
+            </h1>
           </div>
-          <div className={`flex rounded-lg overflow-hidden border w-full sm:w-auto ${
-            darkMode ? "border-blue-800" : "border-gray-200"
-          }`}>
-            <input
-              type="email"
-              placeholder={T.placeholder[language]}
-              className={`text-sm px-4 py-2.5 outline-none flex-1 sm:w-52 ${
-                darkMode ? "bg-[#0a1628] text-white placeholder-blue-400/50" : "bg-white text-slate-700 placeholder-slate-400"
-              }`}
-            />
-            <button className="bg-[#0f2a5e] hover:bg-blue-800 text-white text-[11px] font-bold tracking-widest uppercase px-5 py-2.5 transition-colors whitespace-nowrap">
-              {T.subscribe[language]}
-            </button>
-          </div>
-        </div>
 
-      </div>
-    </section>
+          {/* Category filter */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {allCats.map((c, i) => (
+              <button
+                key={i}
+                onClick={() => setCat(i)}
+                className={`text-[11px] font-semibold tracking-wide px-4 py-1.5 rounded-full border transition-all duration-200 ${
+                  cat === i ? filterActive : filterInactive
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+
+          <div className={`h-px ${dividerC} mb-10`} />
+
+          {/* Cards */}
+          {filtered.length === 0 ? (
+            <div className={`text-center py-24 ${darkMode ? "text-blue-400/40" : "text-slate-400"} text-lg`}>
+              {T.empty[language]}
+            </div>
+          ) : (
+            <>
+              {featured && (
+                <div className="mb-6">
+                  <FeaturedCard item={featured} darkMode={darkMode} language={language} />
+                </div>
+              )}
+              {rest.length > 0 && (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {rest.map((item, i) => (
+                    <NewsCard key={item.id} item={item} index={i} darkMode={darkMode} language={language} />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Newsletter */}
+          <div className={`mt-16 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 border ${
+            darkMode ? "bg-[#0d1f3c] border-blue-900" : "bg-white border-gray-100"
+          }`}>
+            <div>
+              <p className={`${subC} text-[11px] font-semibold tracking-[0.2em] uppercase mb-1`}>
+                {T.subTitle[language]}
+              </p>
+              <h3 className={`${headingC} font-bold text-lg sm:text-xl`}>
+                {T.newsletter[language]}
+              </h3>
+            </div>
+            <div className={`flex rounded-lg overflow-hidden border w-full sm:w-auto ${
+              darkMode ? "border-blue-800" : "border-gray-200"
+            }`}>
+              <input
+                type="email"
+                placeholder={T.placeholder[language]}
+                className={`text-sm px-4 py-2.5 outline-none flex-1 sm:w-52 ${
+                  darkMode ? "bg-[#0a1628] text-white placeholder-blue-400/50" : "bg-white text-slate-700 placeholder-slate-400"
+                }`}
+              />
+              <button className="bg-[#0f2a5e] hover:bg-blue-800 text-white text-[11px] font-bold tracking-widest uppercase px-5 py-2.5 transition-colors whitespace-nowrap">
+                {T.subscribe[language]}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </>
   );
 }
