@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "WBK & BOKA — Butunjahon Belbog'li Kurash va Bel Olish Kurash Assotsiatsiyasi",
+  title: "WBK & BOKA — Butunjahon Belbog'li Kurash Assotsiatsiyasi",
   description:
     "Butunjahon Belbog'li Kurash va Bel Olish Kurash Assotsiatsiyasi (WBK & BOKA) — xalqaro kurash musobaqalari, yangiliklar va rasmiy ma'lumotlar.",
   keywords: [
@@ -27,8 +27,11 @@ export const metadata = {
   publisher: "WBK & BOKA",
   metadataBase: new URL("https://www.wbkboka.org"),
   alternates: { canonical: "/" },
+  verification: {
+    google: "jwnyEuDLCbJOqa7okteQ3y_ixnfTru-nMk3W6ShFnrU",
+  },
   openGraph: {
-    title: "WBK & BOKA — Butunjahon Belbog'li Kurash va Bel Olish Kurash Assotsiatsiyasi",
+    title: "WBK & BOKA — Butunjahon Belbog'li Kurash Assotsiatsiyasi",
     description: "Xalqaro belbog'li kurash va bel olish kurash musobaqalari, yangiliklar va rasmiy ma'lumotlar.",
     url: "https://www.wbkboka.org",
     siteName: "WBK & BOKA",
@@ -38,7 +41,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "WBK & BOKA — Butunjahon Belbog'li Kurash va Bel Olish Kurash Assotsiatsiyasi",
+    title: "WBK & BOKA — Butunjahon Belbog'li Kurash Assotsiatsiyasi",
     description: "Xalqaro belbog'li kurash va bel olish kurash musobaqalari.",
     images: ["https://www.wbkboka.org/og-image.jpg"],
   },
@@ -70,6 +73,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="uz">
       <head>
+        <meta name="google-site-verification" content="jwnyEuDLCbJOqa7okteQ3y_ixnfTru-nMk3W6ShFnrU" />
         <meta property="og:image" content="https://www.wbkboka.org/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
