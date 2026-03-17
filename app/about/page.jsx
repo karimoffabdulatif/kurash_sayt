@@ -319,14 +319,14 @@ export default function AboutPage() {
                   <h3 className={`${titleC} font-black text-[20px] sm:text-[28px] lg:text-[32px] leading-tight`}>
                     {T.contact[language]}
                   </h3>
-                  <p className={`${textC} text-sm mt-2`}>info@kurash.uz</p>
+                  <p className={`${textC} text-sm mt-2`}>info@belboglikurash.uz</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                  <a href="mailto:info@kurash.uz"
+                  <a href="mailto:info@belboglikurash.uz"
                     className="bg-[#0f2a5e] hover:bg-blue-800 text-white text-[11px] font-bold tracking-[0.2em] uppercase px-6 sm:px-8 py-3 rounded-sm transition-colors text-center">
                     Email →
                   </a>
-                  <a href="https://t.me/kurash_uz" target="_blank" rel="noopener noreferrer"
+                  <a href="https://t.me/belboglikurash" target="_blank" rel="noopener noreferrer"
                     className={`border ${darkMode ? "border-blue-700 text-blue-300 hover:bg-blue-900" : "border-[#0f2a5e] text-[#0f2a5e] hover:bg-[#0f2a5e] hover:text-white"} text-[11px] font-bold tracking-[0.2em] uppercase px-6 sm:px-8 py-3 rounded-sm transition-all text-center`}>
                     Telegram →
                   </a>
