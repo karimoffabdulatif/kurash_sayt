@@ -24,7 +24,7 @@ const NAV = {
 };
 
 const CONTACT = [
-  { icon: <FaPhone className="w-3.5 h-3.5" />,       label: "+998 71 123 45 67",   href: "tel:+998711234567" },
+  { icon: <FaPhone className="w-3.5 h-3.5" />,       label: "+998 97 800 19 68",   href: "tel:998978001968" },
   { icon: <FaEnvelope className="w-3.5 h-3.5" />,    label: "info@belboglikurash.uz",       href: "mailto:info@belboglikurash.uz" },
   { icon: <FaMapMarkerAlt className="w-3.5 h-3.5" />, label: { uz: "Toshkent, O'zbekiston", en: "Tashkent, Uzbekistan", ru: "Ташкент, Узбекистан" }, href: "#" },
 ];

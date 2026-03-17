@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -82,6 +83,20 @@ export default function RootLayout({ children }) {
         <meta name="twitter:image" content="https://www.wbkboka.org/og-image.jpg" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-Z3ZB7HN1SF"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-Z3ZB7HN1SF');
+          `}
+        </Script>
+
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
