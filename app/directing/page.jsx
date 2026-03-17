@@ -18,7 +18,7 @@ const MEMBERS = [
   },
   { id: 3, img: "/arraboyev.jpg",   initials: "AZ", color: "#1e3a8a",
     role: { uz: "Bosh kotib",         en: "Secretary General", ru: "Генеральный секретарь" },
-    name: { uz: "Arabboev Ziyodilloh Isroilovich",   en: "Arabboev Ziyodulloh Isroilovich",   ru: "Арабоев Зиёдуллох Исроилович" },
+    name: { uz: "Arabbayev Ziyodillox Isroiljon o'g'li",   en: "Arabbayev Ziyodullox Isroiljon o'g'li",   ru: "Араббаев Зиёдуллох Исроилович" },
     org:  { uz: "Assotsiatsiya",      en: "Association",       ru: "Ассоциация"            },
   },
   { id: 4, img: "/joraboyevich.jpg", initials: "NA", color: "#1d4ed8", country: "🇰🇿",

@@ -41,8 +41,12 @@ subtitle: {
     { n: "10K+", uz: "Sportchi",       en: "Athletes",    ru: "Спортсменов"},
     { n: "2008", uz: "Tashkil topgan", en: "Founded",     ru: "Основана"   },
   ],
-  contact: { uz: "Bog'lanish",         en: "Contact us",  ru: "Связаться"  },
-  back:    { uz: "← Bosh sahifaga",    en: "← Home",      ru: "← На главную" },
+contact: { 
+  uz: "Bog'lanish", 
+  en: "Contact us", 
+  ru: "Связаться", 
+  telegram: "https://t.me/jaka_org" // Bu yerga kanal yoki profil silkasini qo'yasiz
+},  back:    { uz: "← Bosh sahifaga",    en: "← Home",      ru: "← На главную" },
 };
 
 const IMAGES = ["/img-5.jpg", "/img-2.jpg", "/img-3.jpg", "/img-6.jpg"];
@@ -256,10 +260,10 @@ export default function AboutPage() {
               <div className="w-10 h-0.5 bg-blue-400 mb-5" />
               <p className={`${textC} text-base leading-relaxed mb-4`}>{T.desc1[language]}</p>
               <p className={`${textC} text-base leading-relaxed mb-8`}>{T.desc2[language]}</p>
-              <a href="mailto:info@kurash.uz"
+              <button
                 className={`inline-block border ${darkMode ? "border-blue-700 text-blue-300 hover:bg-blue-900" : "border-[#0f2a5e] text-[#0f2a5e] hover:bg-[#0f2a5e] hover:text-white"} text-[11px] font-bold tracking-[0.2em] uppercase px-7 py-3 rounded-sm transition-all duration-300`}>
                 {T.contact[language]} →
-              </a>
+              </button>
             </Reveal>
           </div>
         </section>
@@ -319,14 +323,14 @@ export default function AboutPage() {
                   <h3 className={`${titleC} font-black text-[20px] sm:text-[28px] lg:text-[32px] leading-tight`}>
                     {T.contact[language]}
                   </h3>
-                  <p className={`${textC} text-sm mt-2`}>info@belboglikurash.uz</p>
+                  <p className={`${textC} text-sm mt-2`}>jaka-org@mail.ru</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                  <a href="mailto:info@belboglikurash.uz"
+                  <a href="mailto:jaka-org@mail.ru"
                     className="bg-[#0f2a5e] hover:bg-blue-800 text-white text-[11px] font-bold tracking-[0.2em] uppercase px-6 sm:px-8 py-3 rounded-sm transition-colors text-center">
                     Email →
                   </a>
-                  <a href="https://t.me/belboglikurash" target="_blank" rel="noopener noreferrer"
+                  <a href="https://t.me/jaka_org" target="_blank" rel="noopener noreferrer"
                     className={`border ${darkMode ? "border-blue-700 text-blue-300 hover:bg-blue-900" : "border-[#0f2a5e] text-[#0f2a5e] hover:bg-[#0f2a5e] hover:text-white"} text-[11px] font-bold tracking-[0.2em] uppercase px-6 sm:px-8 py-3 rounded-sm transition-all text-center`}>
                     Telegram →
                   </a>

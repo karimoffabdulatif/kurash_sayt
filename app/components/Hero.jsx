@@ -5,7 +5,7 @@ import { useApp } from "../contex/AppContext";
 const slides = {
   uz: [
     { title: "WBK & BOKA Rasmiy Sayti",       subtitle: "Butunjahon Belbog‘li Kurash va Bel Olish Kurash Assotsiatsiyasi",  img: "/img-2.jpg" },
-    { title: "Xalqaro Musobaqalar",            subtitle: "Dunyoning eng yaxshi belbog' kurashchilari bir maydonda.",               img: "/img-3.jpg" },
+    { title: "Xalqaro Musobaqalar",            subtitle: "Dunyoning eng yaxshi belbog'li kurashchilari bir maydonda.",               img: "/img-3.jpg" },
     { title: "Bizning Sahifamizga Obuna bo'ling",   subtitle: "Belbog'li kurash sportini birga rivojlantiramiz.",                         img: "/img-6.jpg" },
     { title: "Yangiliklar va Tadbirlar",      subtitle: "So'nggi xabarlar va turnirlardan boxabar bo'ling.",              img: "/img-5.jpg" },
   ],
