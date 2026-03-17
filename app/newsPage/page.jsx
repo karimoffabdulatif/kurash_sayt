@@ -15,14 +15,17 @@ const CATS = {
 };
 
 const T = {
-  heading:     { uz: "Yangiliklar",                    en: "News",                      ru: "Новости"                  },
-  empty:       { uz: "Bu kategoriyada yangilik yo'q.", en: "No news in this category.", ru: "Нет новостей в этой категории." },
-  featured:    { uz: "Asosiy yangilik",                en: "Featured",                  ru: "Главное"                  },
-  read:        { uz: "Batafsil o'qish",                en: "Read more",                 ru: "Читать далее"             },
-  subTitle:    { uz: "Xabardor bo'lib turing",         en: "Stay informed",             ru: "Будьте в курсе"           },
-  newsletter:  { uz: "Yangiliklar xabarnomasi",        en: "Newsletter",                ru: "Новостная рассылка"       },
-  placeholder: { uz: "Email manzilingiz",              en: "Your email address",        ru: "Ваш email"                },
-  subscribe:   { uz: "Obuna →",                        en: "Subscribe →",               ru: "Подписаться →"            },
+  heading: { uz: "Yangiliklar", en: "News", ru: "Новости" },
+  empty: {
+    uz: "Xozircha yangilik yo'q.",
+    en: "No news for now.",
+    ru: "Пока новостей нет."
+  }, featured: { uz: "Asosiy yangilik", en: "Featured", ru: "Главное" },
+  read: { uz: "Batafsil o'qish", en: "Read more", ru: "Читать далее" },
+  subTitle: { uz: "Xabardor bo'lib turing", en: "Stay informed", ru: "Будьте в курсе" },
+  newsletter: { uz: "Yangiliklar xabarnomasi", en: "Newsletter", ru: "Новостная рассылка" },
+  placeholder: { uz: "Email manzilingiz", en: "Your email address", ru: "Ваш email" },
+  subscribe: { uz: "Obuna →", en: "Subscribe →", ru: "Подписаться →" },
 };
 
 function useInView(ref) {
@@ -41,7 +44,7 @@ function useInView(ref) {
 }
 
 function useViewTracker(newsId) {
-  const ref     = useRef(null);
+  const ref = useRef(null);
   const tracked = useRef(false);
   useEffect(() => {
     if (!newsId || tracked.current) return;
@@ -141,20 +144,20 @@ function Loader() {
 /* ── Featured Card ── */
 function FeaturedCard({ item, darkMode, language }) {
   const revealRef = useRef(null);
-  const iv        = useInView(revealRef);
-  const viewRef   = useViewTracker(item.id);
+  const iv = useInView(revealRef);
+  const viewRef = useViewTracker(item.id);
   const [hov, setHov] = useState(false);
 
-  const cardBg   = darkMode ? "bg-[#0d1f3c]"    : "bg-white";
-  const titleC   = darkMode ? "text-white"       : "text-[#0f2a5e]";
-  const textC    = darkMode ? "text-blue-200/70" : "text-slate-500";
-  const metaC    = darkMode ? "text-blue-400"    : "text-blue-500";
-  const dividerC = darkMode ? "bg-blue-800"      : "bg-gray-100";
-  const borderC  = darkMode ? "border-blue-900"  : "border-gray-100";
+  const cardBg = darkMode ? "bg-[#0d1f3c]" : "bg-white";
+  const titleC = darkMode ? "text-white" : "text-[#0f2a5e]";
+  const textC = darkMode ? "text-blue-200/70" : "text-slate-500";
+  const metaC = darkMode ? "text-blue-400" : "text-blue-500";
+  const dividerC = darkMode ? "bg-blue-800" : "bg-gray-100";
+  const borderC = darkMode ? "border-blue-900" : "border-gray-100";
 
   const setRefs = (el) => {
     revealRef.current = el;
-    viewRef.current   = el;
+    viewRef.current = el;
   };
 
   return (
@@ -215,9 +218,8 @@ function FeaturedCard({ item, darkMode, language }) {
           </p>
         </div>
         <button
-          className={`mt-6 flex items-center gap-2 text-sm font-semibold transition-all duration-300 ${
-            darkMode ? "text-blue-400 hover:text-blue-300" : "text-[#0f2a5e] hover:text-blue-600"
-          }`}
+          className={`mt-6 flex items-center gap-2 text-sm font-semibold transition-all duration-300 ${darkMode ? "text-blue-400 hover:text-blue-300" : "text-[#0f2a5e] hover:text-blue-600"
+            }`}
           style={{ transform: hov ? "translateX(5px)" : "none" }}
         >
           {T.read[language]} <MdArrowForward className="w-4 h-4" />
@@ -230,19 +232,19 @@ function FeaturedCard({ item, darkMode, language }) {
 /* ── Small Card ── */
 function NewsCard({ item, index, darkMode, language }) {
   const revealRef = useRef(null);
-  const iv        = useInView(revealRef);
-  const viewRef   = useViewTracker(item.id);
+  const iv = useInView(revealRef);
+  const viewRef = useViewTracker(item.id);
   const [hov, setHov] = useState(false);
 
-  const cardBg  = darkMode ? "bg-[#0d1f3c]"    : "bg-white";
-  const titleC  = darkMode ? "text-white"       : "text-[#0f2a5e]";
-  const textC   = darkMode ? "text-blue-200/60" : "text-slate-400";
-  const metaC   = darkMode ? "text-blue-400"    : "text-blue-500";
-  const borderC = darkMode ? "border-blue-900"  : "border-gray-100";
+  const cardBg = darkMode ? "bg-[#0d1f3c]" : "bg-white";
+  const titleC = darkMode ? "text-white" : "text-[#0f2a5e]";
+  const textC = darkMode ? "text-blue-200/60" : "text-slate-400";
+  const metaC = darkMode ? "text-blue-400" : "text-blue-500";
+  const borderC = darkMode ? "border-blue-900" : "border-gray-100";
 
   const setRefs = (el) => {
     revealRef.current = el;
-    viewRef.current   = el;
+    viewRef.current = el;
   };
 
   return (
@@ -341,19 +343,19 @@ export default function NewsPage() {
     };
   }, []);
 
-  const allCats  = CATS[language];
+  const allCats = CATS[language];
   const filtered = cat === 0
     ? newsList
     : newsList.filter((n) => n.category?.uz === CATS.uz[cat]);
 
   const featured = filtered[0];
-  const rest     = filtered.slice(1);
+  const rest = filtered.slice(1);
 
-  const bg           = darkMode ? "bg-[#0a1628]"  : "bg-[#f8f9fc]";
-  const headingC     = darkMode ? "text-white"     : "text-[#0f2a5e]";
-  const subC         = darkMode ? "text-blue-400"  : "text-blue-500";
-  const dividerC     = darkMode ? "bg-blue-900"    : "bg-gray-200";
-  const filterActive   = "bg-[#0f2a5e] text-white border-[#0f2a5e]";
+  const bg = darkMode ? "bg-[#0a1628]" : "bg-[#f8f9fc]";
+  const headingC = darkMode ? "text-white" : "text-[#0f2a5e]";
+  const subC = darkMode ? "text-blue-400" : "text-blue-500";
+  const dividerC = darkMode ? "bg-blue-900" : "bg-gray-200";
+  const filterActive = "bg-[#0f2a5e] text-white border-[#0f2a5e]";
   const filterInactive = darkMode
     ? "bg-transparent text-blue-300 border-blue-800 hover:border-blue-500"
     : "bg-transparent text-slate-500 border-gray-200 hover:border-[#0f2a5e] hover:text-[#0f2a5e]";
@@ -388,9 +390,8 @@ export default function NewsPage() {
               <button
                 key={i}
                 onClick={() => setCat(i)}
-                className={`text-[11px] font-semibold tracking-wide px-4 py-1.5 rounded-full border transition-all duration-200 ${
-                  cat === i ? filterActive : filterInactive
-                }`}
+                className={`text-[11px] font-semibold tracking-wide px-4 py-1.5 rounded-full border transition-all duration-200 ${cat === i ? filterActive : filterInactive
+                  }`}
               >
                 {c}
               </button>
@@ -422,9 +423,8 @@ export default function NewsPage() {
           )}
 
           {/* Newsletter */}
-          <div className={`mt-16 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 border ${
-            darkMode ? "bg-[#0d1f3c] border-blue-900" : "bg-white border-gray-100"
-          }`}>
+          <div className={`mt-16 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 border ${darkMode ? "bg-[#0d1f3c] border-blue-900" : "bg-white border-gray-100"
+            }`}>
             <div>
               <p className={`${subC} text-[11px] font-semibold tracking-[0.2em] uppercase mb-1`}>
                 {T.subTitle[language]}
@@ -433,15 +433,13 @@ export default function NewsPage() {
                 {T.newsletter[language]}
               </h3>
             </div>
-            <div className={`flex rounded-lg overflow-hidden border w-full sm:w-auto ${
-              darkMode ? "border-blue-800" : "border-gray-200"
-            }`}>
+            <div className={`flex rounded-lg overflow-hidden border w-full sm:w-auto ${darkMode ? "border-blue-800" : "border-gray-200"
+              }`}>
               <input
                 type="email"
                 placeholder={T.placeholder[language]}
-                className={`text-sm px-4 py-2.5 outline-none flex-1 sm:w-52 ${
-                  darkMode ? "bg-[#0a1628] text-white placeholder-blue-400/50" : "bg-white text-slate-700 placeholder-slate-400"
-                }`}
+                className={`text-sm px-4 py-2.5 outline-none flex-1 sm:w-52 ${darkMode ? "bg-[#0a1628] text-white placeholder-blue-400/50" : "bg-white text-slate-700 placeholder-slate-400"
+                  }`}
               />
               <button className="bg-[#0f2a5e] hover:bg-blue-800 text-white text-[11px] font-bold tracking-widest uppercase px-5 py-2.5 transition-colors whitespace-nowrap">
                 {T.subscribe[language]}
