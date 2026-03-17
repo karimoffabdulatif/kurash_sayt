@@ -13,8 +13,8 @@ import {
 } from "react-icons/md";
 import { FiCalendar } from "react-icons/fi";
 
-const ADMIN_LOGIN    = process.env.NEXT_PUBLIC_ADMIN_LOGIN    || "admin";
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "12345";
+const ADMIN_LOGIN    = process.env.NEXT_PUBLIC_ADMIN_LOGIN    || "Arabbayev";
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "10001";
 const IMGBB_API_KEY  = "67a7613cbf54d18cb585ee96b0a8240b";
 
 const CATEGORIES = ["Musobaqa","Rekord","Tashkilot","Intervyu","Turnir","Xalqaro"];
