@@ -8,9 +8,9 @@ const T = {
   label:  { uz: "Rasmiy Murojaat",           en: "Official Address",              ru: "Официальное обращение"       },
   name:   { uz: "Shavkat Mirziyoyev",         en: "Shavkat Mirziyoyev",            ru: "Шавкат Мирзиёев"             },
   role1:  { uz: "O'zbekiston Respublikasi Prezidenti", en: "President of the Republic of Uzbekistan", ru: "Президент Республики Узбекистан" },
-  role2:  { uz: "Xalqaro Kurash assotsiatsiyasining Faxriy prezidenti", en: "Honorary President of the International Kurash Association", ru: "Почётный президент Международной ассоциации Кураш" },
-  quote1: { uz: "Qit'amiz sportchilari O'zbek kurashi bo'yicha Yozgi Osiyo o'yinlarida musobaqa o'tkazmoqdalar.", en: "Athletes of our continent are competing in Uzbek Kurash at the Asian Summer Games.", ru: "Спортсмены нашего континента соревнуются на Летних Азиатских играх по узбекскому курашу." },
-  quote2: { uz: "Sport ta'limidagi yana bir yangilik — Kurash mahorat maktablari bo'ladi!", en: "Another innovation in sports education — Kurash skill schools will be established!", ru: "Ещё одно нововведение в спортивном образовании — будут созданы школы мастерства по курашу!" },
+  role2:  { uz: "O‘zbekiston Milliy olimpiya qo‘mitasi raisi", en: "Honorary President of the International Kurash Association", ru: "Почётный президент Международной ассоциации Кураш" },
+  quote1: { uz: "Sport – xalqlarni birlashtiradigan, tinchlik va hamkorlikni rivojlantiradigan kuchli vositadir.", en: "Sport is a powerful tool that unites nations and promotes peace and cooperation.", ru: "Спорт — это мощный инструмент, который объединяет народы и способствует миру и сотрудничеству." },
+  quote2: { uz: "Sport nafaqat musobaqa, balki tinchlik, do‘stlik va xalqaro hamkorlik vositasidir", en: "Sport is not only a competition, but also a means of peace, friendship and international cooperation.", ru: "Спорт — это не только соревнование, но и средство мира, дружбы и международного сотрудничества." },
 };
 
 function useInView(ref) {
