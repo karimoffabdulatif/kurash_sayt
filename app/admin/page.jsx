@@ -10,6 +10,7 @@ import {
   MdLockOutline, MdVisibility, MdVisibilityOff, MdErrorOutline,
   MdCheckCircle, MdAddCircleOutline, MdList, MdDelete, MdImage,
   MdHourglassEmpty, MdLogout, MdZoomIn, MdZoomOut, MdNotifications,
+  MdTranslate,
 } from "react-icons/md";
 import { FiCalendar } from "react-icons/fi";
 
@@ -59,6 +60,29 @@ const BADGE = {
   ru: "text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 w-7 text-center flex-shrink-0",
   en: "text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 w-7 text-center flex-shrink-0",
 };
+
+/* ─── Auto Translate via MyMemory API (free, no key needed) ─────────────── */
+
+async function translateText(text, langPair) {
+  if (!text || !text.trim()) return "";
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.responseData?.translatedText || text;
+}
+
+async function autoTranslate(uzTitle, uzExcerpt) {
+  const [titleRu, titleEn, excerptRu, excerptEn] = await Promise.all([
+    translateText(uzTitle,   "uz|ru"),
+    translateText(uzTitle,   "uz|en"),
+    translateText(uzExcerpt, "uz|ru"),
+    translateText(uzExcerpt, "uz|en"),
+  ]);
+  return {
+    title:   { ru: titleRu,   en: titleEn   },
+    excerpt: { ru: excerptRu, en: excerptEn },
+  };
+}
 
 /* ─── LoginPage ─────────────────────────────────────────────────────────── */
 
@@ -295,12 +319,64 @@ function AdminPanel({ onLogout }) {
   const [deleting, setDeleting]   = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [notifStatus, setNotifStatus] = useState("idle"); // idle | sending | done | error
-  const [sendNotif, setSendNotif]     = useState(true);   // bildirishnoma yuborsinmi
+  const [notifStatus, setNotifStatus] = useState("idle");
+  const [sendNotif, setSendNotif]     = useState(true);
+
+  // ── Tarjima holati ──
+  const [translating, setTranslating] = useState(false);
+  const [translateError, setTranslateError] = useState("");
+
   const fileRef = useRef(null);
 
   const set = (k,v) => setForm(p => ({ ...p, [k]:v }));
   const setCategory = (uzCat) => { set("category_uz",uzCat); set("category_en",CAT_MAP[uzCat]?.en||uzCat); set("category_ru",CAT_MAP[uzCat]?.ru||uzCat); };
+
+  // ── Avtomatik tarjima funksiyasi ──
+  const handleTranslate = async () => {
+    if (!form.title_uz || form.title_uz.trim().length < 2) return;
+    setTranslating(true);
+    setTranslateError("");
+    try {
+      const result = await autoTranslate(form.title_uz, form.excerpt_uz);
+      if (result.title?.ru) set("title_ru", result.title.ru);
+      if (result.title?.en) set("title_en", result.title.en);
+      if (result.excerpt?.ru) set("excerpt_ru", result.excerpt.ru);
+      if (result.excerpt?.en) set("excerpt_en", result.excerpt.en);
+    } catch (err) {
+      console.error("Tarjima xatosi:", err);
+      setTranslateError("Tarjima xato yuz berdi. Qayta urinib ko'ring.");
+      setTimeout(() => setTranslateError(""), 4000);
+    } finally {
+      setTranslating(false);
+    }
+  };
+
+  // ── UZ sarlavhadan chiqilganda avtomatik tarjima ──
+  const handleTitleUzBlur = (e) => {
+    const val = e.target.value.trim();
+    if (val.length >= 2) handleTranslate();
+  };
+
+  // ── Excerpt UZ dan chiqqanda faqat excerpt tarjima qilish ──
+  const handleExcerptUzBlur = async (e) => {
+    const val = e.target.value.trim();
+    if (!val || val.length < 2) return;
+    setTranslating(true);
+    setTranslateError("");
+    try {
+      const [ru, en] = await Promise.all([
+        translateText(val, "uz|ru"),
+        translateText(val, "uz|en"),
+      ]);
+      if (ru) set("excerpt_ru", ru);
+      if (en) set("excerpt_en", en);
+    } catch (err) {
+      setTranslateError("Tarjima xato yuz berdi.");
+      setTimeout(() => setTranslateError(""), 4000);
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   const handleImageUpload = async (e) => {
     const file=e.target.files[0]; if (!file) return;
@@ -343,11 +419,9 @@ function AdminPanel({ onLogout }) {
       setForm(EMPTY); setUploadProgress(0);
       setSuccess(true); setTimeout(() => setSuccess(false), 3000);
 
-      /* ── Bildirishnoma yuborish ── */
       if (sendNotif) {
         setNotifStatus("sending");
         try {
-          /* Email */
           const subscribers = await getAllSubscribers();
           if (subscribers.length > 0) {
             await sendNewsToAllSubscribers({
@@ -357,7 +431,6 @@ function AdminPanel({ onLogout }) {
               newsDate:    newsData.date,
             });
           }
-          /* Push */
           await sendPushToAll({
             title: newsData.title,
             body:  newsData.excerpt,
@@ -411,17 +484,56 @@ function AdminPanel({ onLogout }) {
 
           {/* Sarlavha */}
           <div className="mb-4">
-            <label className={LBL}>Sarlavha *</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className={LBL+" mb-0"}>Sarlavha *</label>
+              {/* Qo'lda tarjima tugmasi */}
+              <button
+                type="button"
+                onClick={handleTranslate}
+                disabled={translating || !form.title_uz}
+                className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all disabled:opacity-40 disabled:cursor-not-allowed border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+              >
+                <MdTranslate size={12}/>
+                {translating ? "Tarjima qilinmoqda..." : "AI tarjima"}
+              </button>
+            </div>
             <div className="space-y-2">
               {LANGS.map(({key,label}) => (
                 <div key={key} className="flex items-center gap-2">
                   <span className={BADGE[key]}>{label}</span>
-                  <input className={INP}
-                    placeholder={key==="uz"?"O'zbekcha sarlavha...":key==="ru"?"Заголовок на русском...":"Title in English..."}
-                    value={form[`title_${key}`]} onChange={e => set(`title_${key}`,e.target.value)} />
+                  <div className="relative flex-1">
+                    <input
+                      className={INP + (key==="uz" && translating ? " pr-8" : "")}
+                      placeholder={
+                        key==="uz" ? "O'zbekcha sarlavha..." :
+                        key==="ru" ? "Заголовок на русском..." :
+                        "Title in English..."
+                      }
+                      value={form[`title_${key}`]}
+                      onChange={e => set(`title_${key}`, e.target.value)}
+                      onBlur={key==="uz" ? handleTitleUzBlur : undefined}
+                    />
+                    {key==="uz" && translating && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 text-[10px] font-bold animate-pulse">
+                        AI...
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
+            {/* Tarjima xato xabari */}
+            {translateError && (
+              <div className="mt-2 bg-red-500/10 border border-red-500/25 rounded-xl px-3 py-2 text-red-400 text-[11px] font-bold flex items-center gap-1.5">
+                <MdErrorOutline size={13}/>{translateError}
+              </div>
+            )}
+            {/* Tarjima muvaffaqiyat xabari */}
+            {!translating && !translateError && form.title_ru && form.title_en && (
+              <div className="mt-2 flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
+                <MdCheckCircle size={12}/> AI tarjima tayyor
+              </div>
+            )}
           </div>
 
           {/* Qisqa matn */}
@@ -432,8 +544,14 @@ function AdminPanel({ onLogout }) {
                 <div key={key} className="flex items-start gap-2">
                   <span className={BADGE[key]+" mt-2.5"}>{label}</span>
                   <textarea rows={2} className={INP+" resize-none"}
-                    placeholder={key==="uz"?"O'zbekcha tavsif...":key==="ru"?"Описание на русском...":"Description in English..."}
-                    value={form[`excerpt_${key}`]} onChange={e => set(`excerpt_${key}`,e.target.value)} />
+                    placeholder={
+                      key==="uz" ? "O'zbekcha tavsif..." :
+                      key==="ru" ? "Описание на русском..." :
+                      "Description in English..."
+                    }
+                    value={form[`excerpt_${key}`]}
+                    onChange={e => set(`excerpt_${key}`, e.target.value)}
+                    onBlur={key==="uz" ? handleExcerptUzBlur : undefined} />
                 </div>
               ))}
             </div>
@@ -521,14 +639,12 @@ function AdminPanel({ onLogout }) {
             {loading?"Saqlanmoqda...":uploading?"Rasm yuklanmoqda...":"Yangilik qo'shish →"}
           </button>
 
-          {/* Success */}
           {success && (
             <div className="mt-3 bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-3 text-emerald-400 text-sm font-bold flex items-center justify-center gap-2">
               <MdCheckCircle className="text-lg"/> Muvaffaqiyatli qo'shildi!
             </div>
           )}
 
-          {/* Notif status */}
           {notifStatus === "sending" && (
             <div className="mt-2 bg-blue-500/10 border border-blue-500/25 rounded-xl px-4 py-2.5 text-blue-400 text-xs font-bold flex items-center gap-2">
               <MdNotifications className="text-base animate-pulse"/> Bildirishnomalar yuborilmoqda...
