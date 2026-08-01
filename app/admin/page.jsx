@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { addNewsToDb, deleteNewsFromDb } from "../lib/newsService";
+import { uploadVideoToStorage } from "../lib/videoService";
 import { useApp } from "../contex/AppContext";
 import { getAllSubscribers } from "../lib/subscriberService";
 import { sendNewsToAllSubscribers } from "../lib/emailService";
@@ -10,7 +11,7 @@ import {
   MdLockOutline, MdVisibility, MdVisibilityOff, MdErrorOutline,
   MdCheckCircle, MdAddCircleOutline, MdList, MdDelete, MdImage,
   MdHourglassEmpty, MdLogout, MdZoomIn, MdZoomOut, MdNotifications,
-  MdTranslate,
+  MdTranslate, MdVideoLibrary,
 } from "react-icons/md";
 import { FiCalendar } from "react-icons/fi";
 
@@ -43,7 +44,7 @@ const EMPTY = {
   title_uz:"", title_en:"", title_ru:"",
   excerpt_uz:"", excerpt_en:"", excerpt_ru:"",
   category_uz:"Musobaqa", category_en:"Tournament", category_ru:"Турнир",
-  img:"", imgPosition:"50% 50%", imgScale:1,
+  img:"", imgPosition:"50% 50%", imgScale:1, mediaType:"image",
   date_uz:"", date_en:"", date_ru:"",
 };
 
@@ -380,22 +381,40 @@ function AdminPanel({ onLogout }) {
 
   const handleImageUpload = async (e) => {
     const file=e.target.files[0]; if (!file) return;
-    if (!file.type.startsWith("image/")) { alert("Faqat rasm fayl!"); return; }
-    if (file.size>5*1024*1024) { alert("Max 5MB!"); return; }
-    setUploading(true); setUploadProgress(30);
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+    if (!isImage && !isVideo) { alert("Faqat rasm yoki video fayl!"); return; }
+
+    if (isImage) {
+      if (file.size>5*1024*1024) { alert("Rasm uchun max 5MB!"); return; }
+      setUploading(true); setUploadProgress(30);
+      try {
+        const fd=new FormData(); fd.append("image",file); fd.append("key",IMGBB_API_KEY);
+        setUploadProgress(60);
+        const res=await fetch("https://api.imgbb.com/1/upload",{method:"POST",body:fd});
+        const data=await res.json();
+        if (data.success) {
+          set("img",data.data.url); set("mediaType","image");
+          set("imgPosition","50% 50%"); set("imgScale",1); setUploadProgress(100);
+        } else throw new Error("Yuklanmadi");
+      } catch(err) { alert("Xato: "+err.message); setUploadProgress(0); }
+      finally { setUploading(false); }
+      return;
+    }
+
+    // Video — Firebase Storage'ga yuklanadi
+    if (file.size>50*1024*1024) { alert("Video uchun max 50MB!"); return; }
+    setUploading(true); setUploadProgress(1);
     try {
-      const fd=new FormData(); fd.append("image",file); fd.append("key",IMGBB_API_KEY);
-      setUploadProgress(60);
-      const res=await fetch("https://api.imgbb.com/1/upload",{method:"POST",body:fd});
-      const data=await res.json();
-      if (data.success) { set("img",data.data.url); set("imgPosition","50% 50%"); set("imgScale",1); setUploadProgress(100); }
-      else throw new Error("Yuklanmadi");
-    } catch(err) { alert("Xato: "+err.message); setUploadProgress(0); }
+      const url = await uploadVideoToStorage(file, (pct) => setUploadProgress(pct));
+      set("img",url); set("mediaType","video");
+      set("imgPosition","50% 50%"); set("imgScale",1);
+    } catch(err) { alert("Video yuklashda xato: "+err.message); setUploadProgress(0); }
     finally { setUploading(false); }
   };
 
   const handleSubmit = async () => {
-    if (!form.title_uz||!form.img) { alert("Majburiy: Sarlavha (UZ), Rasm"); return; }
+    if (!form.title_uz||!form.img) { alert("Majburiy: Sarlavha (UZ), Rasm/Video"); return; }
     if (!form.date_uz&&!form.date_en&&!form.date_ru) { alert("Kamida bitta sana kiriting!"); return; }
     setLoading(true);
     try {
@@ -405,6 +424,7 @@ function AdminPanel({ onLogout }) {
         excerpt:     { uz:form.excerpt_uz,  en:form.excerpt_en,  ru:form.excerpt_ru  },
         category:    { uz:form.category_uz, en:form.category_en, ru:form.category_ru },
         img:         form.img,
+        mediaType:   form.mediaType || "image",
         imgPosition: form.imgPosition,
         imgScale:    form.imgScale,
         date:        form.date_uz||form.date_en||form.date_ru,
@@ -580,28 +600,32 @@ function AdminPanel({ onLogout }) {
             </div>
           </div>
 
-          {/* Rasm */}
+          {/* Rasm / Video */}
           <div className="mb-3">
-            <label className={LBL}>Rasm *</label>
+            <label className={LBL}>Rasm yoki Video *</label>
             <div onClick={() => !uploading && fileRef.current?.click()}
               className={`border-2 border-dashed rounded-xl transition-colors bg-[#070f1e] ${uploading?"border-blue-500/50 cursor-wait":"border-[#0e2038] hover:border-[#1a3050] cursor-pointer"}`}>
               {form.img ? (
                 <div className="p-2">
                   <div className="h-40 rounded-lg overflow-hidden mb-2">
-                    <img src={form.img} alt="preview" className="w-full h-full pointer-events-none"
-                      style={{ objectFit:"cover", objectPosition:form.imgPosition, transform:`scale(${form.imgScale??1})`, transformOrigin:form.imgPosition }} />
+                    {form.mediaType === "video" ? (
+                      <video src={form.img} className="w-full h-full object-cover pointer-events-none" muted playsInline />
+                    ) : (
+                      <img src={form.img} alt="preview" className="w-full h-full pointer-events-none"
+                        style={{ objectFit:"cover", objectPosition:form.imgPosition, transform:`scale(${form.imgScale??1})`, transformOrigin:form.imgPosition }} />
+                    )}
                   </div>
                   {!uploading && <p className="text-center text-[#2d5078] text-xs pb-1">O'zgartirish uchun bosing</p>}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-10">
                   {uploading ? <MdHourglassEmpty className="text-blue-400 text-3xl mb-2"/> : <MdImage className="text-[#1a3050] text-4xl mb-2"/>}
-                  <p className="text-[#5b8ab0] text-sm font-bold">{uploading?"Yuklanmoqda...":"Rasm tanlash"}</p>
-                  <p className="text-[#1a3050] text-xs mt-1">JPG, PNG, WEBP — max 5MB</p>
+                  <p className="text-[#5b8ab0] text-sm font-bold">{uploading?"Yuklanmoqda...":"Rasm yoki video tanlash"}</p>
+                  <p className="text-[#1a3050] text-xs mt-1">Rasm: JPG/PNG/WEBP max 5MB · Video: MP4/WEBM max 50MB</p>
                 </div>
               )}
             </div>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            <input ref={fileRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleImageUpload} />
             {uploading && (
               <div className="mt-2">
                 <div className="flex justify-between text-[10px] text-[#5b8ab0] mb-1"><span>Yuklanmoqda...</span><span>{uploadProgress}%</span></div>
@@ -615,7 +639,7 @@ function AdminPanel({ onLogout }) {
             )}
           </div>
 
-          {form.img && !uploading && (
+          {form.img && !uploading && form.mediaType !== "video" && (
             <ImagePositioner src={form.img} position={form.imgPosition} scale={form.imgScale}
               onPositionChange={v => set("imgPosition",v)} onScaleChange={v => set("imgScale",v)} />
           )}
@@ -636,7 +660,7 @@ function AdminPanel({ onLogout }) {
           {/* Submit */}
           <button onClick={handleSubmit} disabled={loading||uploading}
             className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-[#0e2038] disabled:text-[#2d5078] disabled:cursor-not-allowed text-white font-black rounded-xl text-xs tracking-[0.18em] uppercase transition-all">
-            {loading?"Saqlanmoqda...":uploading?"Rasm yuklanmoqda...":"Yangilik qo'shish →"}
+            {loading?"Saqlanmoqda...":uploading?(form.mediaType==="video"?"Video yuklanmoqda...":"Rasm yuklanmoqda..."):"Yangilik qo'shish →"}
           </button>
 
           {success && (

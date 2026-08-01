@@ -220,14 +220,20 @@ function FeaturedCard({ item, darkMode, language, expanded, onToggle }) {
       >
         {/* Image */}
         <div className="relative overflow-hidden h-64 sm:h-80 lg:h-auto" style={{ minHeight: 380 }}>
-          <img src={item.img} alt={item.title[language]}
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              objectPosition: item.imgPosition || "center",
-              transform: hov && !expanded ? "scale(1.04)" : "scale(1)",
-              transition: "transform .6s ease",
-            }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent" />
+          {item.mediaType === "video" ? (
+            <video src={item.img} className="absolute inset-0 w-full h-full object-cover"
+              controls playsInline
+              style={{ transform: hov && !expanded ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
+          ) : (
+            <img src={item.img} alt={item.title[language]}
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                objectPosition: item.imgPosition || "center",
+                transform: hov && !expanded ? "scale(1.04)" : "scale(1)",
+                transition: "transform .6s ease",
+              }} />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent pointer-events-none" />
           <span className="absolute top-4 left-4 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm">
             {item.category?.[language] ?? ""}
           </span>
@@ -336,14 +342,19 @@ function NewsCard({ item, index, darkMode, language, expanded, onToggle }) {
       >
         {/* Image */}
         <div className="relative overflow-hidden h-52 sm:h-60 flex-shrink-0">
-          <img src={item.img} alt={item.title[language]}
-            className="w-full h-full object-cover"
-            style={{
-              objectPosition: item.imgPosition || "center",
-              transform: hov && !expanded ? "scale(1.05)" : "scale(1)",
-              transition: "transform .5s ease",
-            }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/50 to-transparent" />
+          {item.mediaType === "video" ? (
+            <video src={item.img} className="w-full h-full object-cover" muted playsInline
+              style={{ transform: hov && !expanded ? "scale(1.05)" : "scale(1)", transition: "transform .5s ease" }} />
+          ) : (
+            <img src={item.img} alt={item.title[language]}
+              className="w-full h-full object-cover"
+              style={{
+                objectPosition: item.imgPosition || "center",
+                transform: hov && !expanded ? "scale(1.05)" : "scale(1)",
+                transition: "transform .5s ease",
+              }} />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/50 to-transparent pointer-events-none" />
           <span className="absolute top-3 left-3 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-sm">
             {item.category?.[language] ?? ""}
           </span>

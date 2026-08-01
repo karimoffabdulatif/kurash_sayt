@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useApp } from "../contex/AppContext";
 import { HiStar } from "react-icons/hi";
 import { FiArrowUpRight, FiEye } from "react-icons/fi";
-import { MdArrowForward } from "react-icons/md";
+import { MdArrowForward, MdPlayCircleFilled } from "react-icons/md";
 import { incrementView } from "../lib/newsService";
 
 const TICKER_WORDS = [
@@ -18,6 +18,7 @@ const TICKER_WORDS = [
 const T = {
   mainNews: { uz: "Asosiy yangilik",    en: "Featured",        ru: "Главное"           },
   readMore: { uz: "Batafsil o'qish",    en: "Read more",       ru: "Читать далее"      },
+  watchVideo: { uz: "Videoni ko'rish",  en: "Watch video",     ru: "Смотреть видео"    },
   newsPage: { uz: "Barcha yangiliklar", en: "All news",        ru: "Все новости"       },
   label:    { uz: "So'nggi yangiliklar",en: "Latest news",     ru: "Последние новости" },
   views:    { uz: "ko'rishlar",         en: "views",           ru: "просмотров"        },
@@ -126,13 +127,27 @@ export default function News() {
             >
               {/* Image */}
               <div className="relative overflow-hidden h-64 sm:h-80 lg:h-auto" style={{ minHeight: "420px" }}>
-                <div className="hidden lg:block absolute inset-0">
-                  <img src={featured.img} alt={featured.title[language]} className="w-full h-full object-cover"
-                    style={{ objectPosition: featured.imgPosition || "center", transform: hov ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
-                </div>
-                <img src={featured.img} alt={featured.title[language]} className="lg:hidden w-full h-full object-cover"
-                  style={{ objectPosition: featured.imgPosition || "center", transform: hov ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent" />
+                {featured.mediaType === "video" ? (
+                  <>
+                    <video src={featured.img} className="absolute inset-0 w-full h-full object-cover" muted playsInline
+                      style={{ transform: hov ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                        <div className="w-0 h-0 border-y-[9px] border-y-transparent border-l-[15px] border-l-white ml-1" />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="hidden lg:block absolute inset-0">
+                      <img src={featured.img} alt={featured.title[language]} className="w-full h-full object-cover"
+                        style={{ objectPosition: featured.imgPosition || "center", transform: hov ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
+                    </div>
+                    <img src={featured.img} alt={featured.title[language]} className="lg:hidden w-full h-full object-cover"
+                      style={{ objectPosition: featured.imgPosition || "center", transform: hov ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
+                  </>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent pointer-events-none" />
                 <span className="absolute top-4 left-4 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm">
                   {featured.category?.[language] ?? ""}
                 </span>
@@ -176,12 +191,23 @@ export default function News() {
                   <Link href="/newsPage">
                     <button
                       className={`text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
-                        darkMode ? "text-blue-400 hover:text-blue-300" : "text-[#0f2a5e] hover:text-blue-600"
+                        featured.mediaType === "video"
+                          ? "animate-pulse " + (darkMode ? "text-red-400 hover:text-red-300" : "text-red-600 hover:text-red-500")
+                          : darkMode ? "text-blue-400 hover:text-blue-300" : "text-[#0f2a5e] hover:text-blue-600"
                       }`}
                       style={{ transform: hov ? "translateX(4px)" : "none" }}
                     >
-                      {T.readMore[language]}
-                      <MdArrowForward className="w-4 h-4" />
+                      {featured.mediaType === "video" ? (
+                        <>
+                          <MdPlayCircleFilled className="w-4 h-4" />
+                          {T.watchVideo[language]}
+                        </>
+                      ) : (
+                        <>
+                          {T.readMore[language]}
+                          <MdArrowForward className="w-4 h-4" />
+                        </>
+                      )}
                     </button>
                   </Link>
                   <span className={darkMode ? "text-blue-800" : "text-gray-200"}>|</span>
@@ -241,9 +267,21 @@ function SmallCard({ news, index, hovSmall, setHovSmall, darkMode, language,
         style={{ boxShadow: shadow(hovSmall === index) }}
       >
         <div className="relative overflow-hidden h-52 sm:h-60">
-          <img src={news.img} alt={news.title[language]} className="w-full h-full object-cover"
-            style={{ objectPosition: news.imgPosition || "center", transform: hovSmall === index ? "scale(1.05)" : "scale(1)", transition: "transform .5s ease" }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/50 to-transparent" />
+          {news.mediaType === "video" ? (
+            <>
+              <video src={news.img} className="w-full h-full object-cover" muted playsInline
+                style={{ transform: hovSmall === index ? "scale(1.05)" : "scale(1)", transition: "transform .5s ease" }} />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                  <div className="w-0 h-0 border-y-[7px] border-y-transparent border-l-[12px] border-l-white ml-1" />
+                </div>
+              </div>
+            </>
+          ) : (
+            <img src={news.img} alt={news.title[language]} className="w-full h-full object-cover"
+              style={{ objectPosition: news.imgPosition || "center", transform: hovSmall === index ? "scale(1.05)" : "scale(1)", transition: "transform .5s ease" }} />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/50 to-transparent pointer-events-none" />
           <span className="absolute top-3 left-3 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-sm">
             {news.category?.[language] ?? ""}
           </span>
@@ -276,8 +314,13 @@ function SmallCard({ news, index, hovSmall, setHovSmall, darkMode, language,
           </p>
 
           <div className={`flex items-center justify-between pt-3 mt-2 border-t ${borderC}`}>
-            <span className={`text-xs font-semibold flex items-center gap-1 ${darkMode ? "text-blue-400" : "text-[#0f2a5e]"}`}>
-              {T.readMore[language]}
+            <span className={`text-xs font-semibold flex items-center gap-1 ${
+              news.mediaType === "video"
+                ? "animate-pulse " + (darkMode ? "text-red-400" : "text-red-600")
+                : darkMode ? "text-blue-400" : "text-[#0f2a5e]"
+            }`}>
+              {news.mediaType === "video" && <MdPlayCircleFilled className="w-3.5 h-3.5" />}
+              {news.mediaType === "video" ? T.watchVideo[language] : T.readMore[language]}
             </span>
             <div
               className="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300"
