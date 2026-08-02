@@ -4,7 +4,7 @@ import { getReadTime } from '../lib/timeUtils';
 import { useState, useRef, useEffect } from "react";
 import { useApp } from "../contex/AppContext";
 import { HiStar } from "react-icons/hi";
-import { FiArrowUpRight, FiEye, FiX } from "react-icons/fi";
+import { FiArrowUpRight, FiEye } from "react-icons/fi";
 import { MdArrowForward, MdKeyboardArrowUp } from "react-icons/md";
 import { incrementView } from "../lib/newsService";
 import { getMediaArray } from "../lib/mediaUtils";
@@ -86,7 +86,7 @@ function ViewBadge({ views, darkMode, small = false }) {
   );
 }
 
-/* ─── Accordion Content (kengaygan qism) ────────────────────────────────── */
+/* ─── Accordion Content (kengaygan qism — faqat matn va yopish tugmasi) ──── */
 
 function AccordionBody({ item, darkMode, language, onClose }) {
   const bodyRef = useRef(null);
@@ -101,11 +101,9 @@ function AccordionBody({ item, darkMode, language, onClose }) {
 
   const dividerC = darkMode ? "border-blue-900/60" : "border-gray-100";
   const textC    = darkMode ? "text-blue-100/80"   : "text-slate-600";
-  const cardBg   = darkMode ? "bg-[#0d1f3c]"        : "bg-white";
 
-  /* Faqat to'liq matn — excerpt yoki content */
+  /* Faqat to'liq matn — content yoki excerpt */
   const fullText = item.content?.[language] || item.excerpt?.[language] || "";
-  const allMedia = getMediaArray(item);
 
   return (
     <div
@@ -132,26 +130,6 @@ function AccordionBody({ item, darkMode, language, onClose }) {
             ))
           }
         </div>
-
-        {/* Bir nechta rasm/video bo'lsa — hammasini alohida ko'rsatamiz */}
-        {allMedia.length > 1 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-5">
-            {allMedia.map((m, i) => (
-              <div
-                key={i}
-                className={`relative overflow-hidden rounded-xl border ${dividerC} ${cardBg}`}
-                style={{ aspectRatio: "1 / 1" }}
-              >
-                {m.type === "video" ? (
-                  <video src={m.url} className="absolute inset-0 w-full h-full object-cover" controls playsInline />
-                ) : (
-                  <img src={m.url} alt="" className="absolute inset-0 w-full h-full object-cover"
-                    style={{ objectPosition: m.position || "50% 50%" }} />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Yopish tugmasi */}
         <button
@@ -238,31 +216,30 @@ function FeaturedCard({ item, darkMode, language, expanded, onToggle }) {
     >
       {/* Karta asosiy qismi */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-2"
+        className="grid grid-cols-1 lg:grid-cols-2 lg:items-start"
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
       >
-        {/* Media — o'lcham rasm/videoning o'z proporsiyasidan olinadi */}
-        <MediaGallery
-          media={getMediaArray(item)}
-          alt={item.title[language]}
-          hovered={hov && !expanded}
-          controls={getMediaArray(item).length === 1}
-          minRatio={0.5}
-          maxRatio={1.9}
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent pointer-events-none" />
-          <span className="absolute top-4 left-4 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm">
-            {item.category?.[language] ?? ""}
-          </span>
-          <span className="absolute bottom-4 left-4 bg-white/15 backdrop-blur-md border border-white/20 text-white text-[9px] font-medium tracking-widest uppercase px-3 py-1.5 rounded-sm flex items-center gap-1.5">
-            <HiStar className="w-3 h-3 text-yellow-300" />
-            {T.featured[language]}
-          </span>
-          <div className="absolute bottom-4 right-4 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5">
-            <FiEye className="w-3 h-3" /> {item.views ?? 0}
-          </div>
-        </MediaGallery>
+        {/* Media — chap ustunni 100% to'ldiradi, bo'sh joy qolmaydi */}
+        <div className="relative w-full">
+          <MediaGallery
+            media={getMediaArray(item)}
+            alt={item.title[language]}
+            hovered={hov && !expanded}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent pointer-events-none" />
+            <span className="absolute top-4 left-4 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm z-10">
+              {item.category?.[language] ?? ""}
+            </span>
+            <span className="absolute bottom-4 left-4 bg-white/15 backdrop-blur-md border border-white/20 text-white text-[9px] font-medium tracking-widest uppercase px-3 py-1.5 rounded-sm flex items-center gap-1.5 z-10">
+              <HiStar className="w-3 h-3 text-yellow-300" />
+              {T.featured[language]}
+            </span>
+            <div className="absolute bottom-4 right-4 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 z-10">
+              <FiEye className="w-3 h-3" /> {item.views ?? 0}
+            </div>
+          </MediaGallery>
+        </div>
 
         {/* Content */}
         <div className={`flex flex-col justify-between p-6 sm:p-8 ${cardBg}`}>
@@ -358,20 +335,18 @@ function NewsCard({ item, index, darkMode, language, expanded, onToggle }) {
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
       >
-        {/* Media — o'lcham rasm/videoning o'z proporsiyasidan olinadi */}
+        {/* Media */}
         <MediaGallery
           media={getMediaArray(item)}
           alt={item.title[language]}
           hovered={hov && !expanded}
           className="flex-shrink-0"
-          minRatio={0.65}
-          maxRatio={1.9}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/50 to-transparent pointer-events-none" />
-          <span className="absolute top-3 left-3 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-sm">
+          <span className="absolute top-3 left-3 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-sm z-10">
             {item.category?.[language] ?? ""}
           </span>
-          <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+          <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 z-10">
             <FiEye className="w-3 h-3" /> {item.views ?? 0}
           </div>
         </MediaGallery>

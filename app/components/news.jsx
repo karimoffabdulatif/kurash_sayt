@@ -44,7 +44,7 @@ function useViewTracker(newsId) {
           obs.disconnect();
         }
       },
-      { threshold: 0.5 } // 50% ko'ringanda hisoblanadi
+      { threshold: 0.5 }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -75,7 +75,6 @@ export default function News() {
   const featured  = newsList[0];
   const smallNews = newsList.slice(1, 3);
 
-  // Featured card view tracker
   const featuredRef = useViewTracker(featured?.id);
 
   const bg      = darkMode ? "bg-[#0a1628]"    : "bg-[#f8f9fc]";
@@ -119,38 +118,37 @@ export default function News() {
         <div className="max-w-6xl mx-auto">
           <div className="space-y-5">
 
-            {/* ── Featured Card ── */}
+            {/* ── Featured Card (kattalashtirildi: min-h-420px) ── */}
             <div
               ref={featuredRef}
               onMouseEnter={() => setHov(true)}
               onMouseLeave={() => setHov(false)}
-              className={`grid grid-cols-1 lg:grid-cols-2 lg:items-stretch rounded-2xl overflow-hidden ${cardBg} border ${borderC} cursor-pointer transition-all duration-300`}
+              className={`grid grid-cols-1 lg:grid-cols-2 lg:items-start rounded-2xl overflow-hidden ${cardBg} border ${borderC} cursor-pointer transition-all duration-300`}
               style={{ boxShadow: shadow(hov) }}
             >
-              {/* Media — o'lcham rasm/videoning o'z proporsiyasidan olinadi */}
-              <MediaGallery
-                media={getMediaArray(featured)}
-                alt={featured.title[language]}
-                hovered={hov}
-                className="lg:h-full"
-                minRatio={0.5}
-                maxRatio={1.9}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent pointer-events-none" />
-                <span className="absolute top-4 left-4 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm">
-                  {featured.category?.[language] ?? ""}
-                </span>
-                <span className="absolute bottom-4 left-4 bg-white/15 backdrop-blur-md border border-white/20 text-white text-[9px] font-medium tracking-widest uppercase px-3 py-1.5 rounded-sm flex items-center gap-1.5">
-                  <HiStar className="w-3 h-3 text-yellow-300" />
-                  {T.mainNews[language]}
-                </span>
+              {/* Media — 100% balandlikda moslashadi */}
+              <div className="relative w-full">
+                <MediaGallery
+                  media={getMediaArray(featured)}
+                  alt={featured.title[language]}
+                  hovered={hov}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent pointer-events-none" />
+                  <span className="absolute top-4 left-4 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm z-10">
+                    {featured.category?.[language] ?? ""}
+                  </span>
+                  <span className="absolute bottom-4 left-4 bg-white/15 backdrop-blur-md border border-white/20 text-white text-[9px] font-medium tracking-widest uppercase px-3 py-1.5 rounded-sm flex items-center gap-1.5 z-10">
+                    <HiStar className="w-3 h-3 text-yellow-300" />
+                    {T.mainNews[language]}
+                  </span>
 
-                {/* Ko'rishlar — rasm ustida o'ng pastda */}
-                <div className="absolute bottom-4 right-4 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                  <FiEye className="w-3 h-3" />
-                  {featured.views ?? 0}
-                </div>
-              </MediaGallery>
+                  {/* Ko'rishlar */}
+                  <div className="absolute bottom-4 right-4 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 z-10">
+                    <FiEye className="w-3 h-3" />
+                    {featured.views ?? 0}
+                  </div>
+                </MediaGallery>
+              </div>
 
               {/* Content */}
               <div className={`flex flex-col justify-between p-6 sm:p-8 lg:p-10 ${cardBg} transition-colors duration-300`}>
@@ -171,7 +169,7 @@ export default function News() {
                   </h2>
                   <div className={`h-px ${dividerC} mb-4 transition-all duration-500`}
                     style={{ width: hov ? "100%" : "40%" }} />
-                  <p className={`${textC} text-sm leading-relaxed line-clamp-4`}>
+                  <p className={`${textC} text-sm leading-relaxed line-clamp-5`}>
                     {featured.excerpt[language]}
                   </p>
                 </div>
@@ -240,7 +238,7 @@ export default function News() {
   );
 }
 
-/* Kichik karta — alohida component, view tracker uchun */
+/* Kichik karta */
 function SmallCard({ news, index, hovSmall, setHovSmall, darkMode, language,
   cardBg, borderC, titleC, textC, metaC, dividerC, shadow, T }) {
 
@@ -259,15 +257,12 @@ function SmallCard({ news, index, hovSmall, setHovSmall, darkMode, language,
           media={getMediaArray(news)}
           alt={news.title[language]}
           hovered={hovSmall === index}
-          minRatio={0.65}
-          maxRatio={1.9}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/50 to-transparent pointer-events-none" />
-          <span className="absolute top-3 left-3 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-sm">
+          <span className="absolute top-3 left-3 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-sm z-10">
             {news.category?.[language] ?? ""}
           </span>
-          {/* Ko'rishlar — rasm ustida */}
-          <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+          <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 z-10">
             <FiEye className="w-3 h-3" />
             {news.views ?? 0}
           </div>

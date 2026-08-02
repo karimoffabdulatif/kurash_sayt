@@ -283,10 +283,10 @@ function SmallCard({ member, index, darkMode, language, delay }) {
         )}
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 z-10 transition-transform duration-400"
           style={{ transform: hov ? "translateY(-3px)" : "translateY(0)" }}>
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-start gap-2 mb-1.5">
             <div className="h-px bg-blue-400/60 transition-all duration-500 flex-shrink-0"
-              style={{ width: hov ? "24px" : "12px" }} />
-            <span className="text-blue-400/80 text-[9px] font-black tracking-[0.2em] uppercase truncate">
+              style={{ width: hov ? "24px" : "12px", marginTop: "0.45em" }} />
+            <span className="min-w-0 text-blue-400/80 text-[8px] sm:text-[9px] font-black tracking-[0.12em] sm:tracking-[0.2em] uppercase leading-[1.35] whitespace-normal break-words">
               {member.role[language]}
             </span>
           </div>

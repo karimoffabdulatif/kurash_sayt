@@ -4,6 +4,7 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
+  updateDoc,
   doc,
   orderBy,
   query,
@@ -40,6 +41,15 @@ export async function addNewsToDb(item) {
     ...item,
     views: 0,
     createdAt: serverTimestamp(),
+  });
+}
+
+// Yangilikni tahrirlash (mavjud hujjatni yangilash)
+export async function updateNewsInDb(id, item) {
+  if (!id) throw new Error("updateNewsInDb: id talab qilinadi");
+  await updateDoc(doc(db, NEWS_COL, id), {
+    ...item,
+    updatedAt: serverTimestamp(),
   });
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { addNewsToDb, deleteNewsFromDb } from "../lib/newsService";
+import { addNewsToDb, deleteNewsFromDb, updateNewsInDb } from "../lib/newsService";
 import { uploadVideoToStorage } from "../lib/videoService";
 import { useApp } from "../contex/AppContext";
 import { getAllPushTokens, sendPushToAll } from "../lib/pushService";
@@ -9,7 +9,7 @@ import {
   MdLockOutline, MdVisibility, MdVisibilityOff, MdErrorOutline,
   MdCheckCircle, MdAddCircleOutline, MdList, MdDelete, MdImage,
   MdHourglassEmpty, MdLogout, MdZoomIn, MdZoomOut, MdNotifications,
-  MdTranslate, MdVideoLibrary,
+  MdTranslate, MdVideoLibrary, MdEdit, MdClose,
 } from "react-icons/md";
 import { FiCalendar } from "react-icons/fi";
 
@@ -42,11 +42,21 @@ const EMPTY = {
   title_uz:"", title_en:"", title_ru:"",
   excerpt_uz:"", excerpt_en:"", excerpt_ru:"",
   category_uz:"Musobaqa", category_en:"Tournament", category_ru:"Турнир",
-  media: [], // [{ type:"image"|"video", url, w, h, position, scale }]
+  media: [], // [{ type:"image"|"video", url, w, h, position, scale, fit }]
   date_uz:"", date_en:"", date_ru:"",
 };
 
-const MAX_MEDIA = 6; // jami rasm+video soni chegarasi
+const MAX_MEDIA = 6;
+
+const getSafeMediaScale = (item) => {
+  const scale = item?.scale ?? 1;
+  return item?.fit === "cover" ? Math.max(scale, 1) : scale;
+};
+
+const normalizeCoverMedia = (item) => ({
+  ...item,
+  scale: getSafeMediaScale(item),
+});
 
 const LANGS = [
   { key:"uz", label:"UZ" },
@@ -62,7 +72,7 @@ const BADGE = {
   en: "text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 w-7 text-center flex-shrink-0",
 };
 
-/* ─── Auto Translate via MyMemory API (free, no key needed) ─────────────── */
+/* ─── Auto Translate via MyMemory API ─────────────────────────────────────── */
 
 async function translateText(text, langPair) {
   if (!text || !text.trim()) return "";
@@ -223,88 +233,187 @@ function DatePicker({ value, onChange, lang="uz" }) {
   );
 }
 
-/* ─── ImagePositioner ────────────────────────────────────────────────────── */
+/* ─── MediaPositioner (Admin Panelda har bir rasm va videoni to'liq sozlash) ─────── */
 
-function ImagePositioner({ src, position, scale, onPositionChange, onScaleChange }) {
+function MediaPositioner({ mediaList, selectedIndex, onSelectIndex, onUpdateMedia, onReorderMedia }) {
   const containerRef = useRef(null);
   const isDragging   = useRef(false);
+  const [dragging, setDragging] = useState(false);
   const startTouch   = useRef({ x:0, y:0 });
   const startObjPos  = useRef({ x:50, y:50 });
+
+  if (!mediaList || mediaList.length === 0) return null;
+
+  const currentIdx = Math.min(selectedIndex, mediaList.length - 1);
+  const currentItem = mediaList[currentIdx] || mediaList[0];
+
+  const position = currentItem.position || "50% 50%";
+  const fit = currentItem.fit || "contain";
+  const scale = getSafeMediaScale(currentItem);
+  const mediaW = currentItem.w || (currentItem.type === "video" ? 16 : 4);
+  const mediaH = currentItem.h || (currentItem.type === "video" ? 9 : 3);
+  const mediaRatio = mediaW / mediaH;
 
   const parsePos = (pos) => { const [x,y]=pos.replace(/%/g,"").split(" ").map(Number); return { x:isNaN(x)?50:x, y:isNaN(y)?50:y }; };
   const clamp    = (v,mn,mx) => Math.min(mx, Math.max(mn,v));
 
-  const onMouseDown = (e) => { e.preventDefault(); isDragging.current=true; startTouch.current={x:e.clientX,y:e.clientY}; startObjPos.current=parsePos(position); };
+  const updateCurrent = (key, val) => {
+    onUpdateMedia(currentIdx, { ...currentItem, [key]: val });
+  };
+
+  const onMouseDown = (e) => {
+    e.preventDefault(); isDragging.current=true; setDragging(true); startTouch.current={x:e.clientX,y:e.clientY}; startObjPos.current=parsePos(position);
+  };
   const onMouseMove = (e) => {
     if (!isDragging.current||!containerRef.current) return;
     const rect=containerRef.current.getBoundingClientRect();
     const dx=((e.clientX-startTouch.current.x)/rect.width)*100;
     const dy=((e.clientY-startTouch.current.y)/rect.height)*100;
-    onPositionChange(`${Math.round(clamp(startObjPos.current.x-dx,0,100))}% ${Math.round(clamp(startObjPos.current.y-dy,0,100))}%`);
+    updateCurrent("position", `${Math.round(clamp(startObjPos.current.x-dx,0,100))}% ${Math.round(clamp(startObjPos.current.y-dy,0,100))}%`);
   };
-  const onMouseUp = () => { isDragging.current=false; };
+  const onMouseUp = () => { isDragging.current=false; setDragging(false); };
 
-  const onTouchStart = (e) => {
-    isDragging.current=true; startTouch.current={x:e.touches[0].clientX,y:e.touches[0].clientY}; startObjPos.current=parsePos(position);
-    document.body.style.overflow="hidden"; document.body.style.touchAction="none";
-  };
-  const onTouchMove = useCallback((e) => {
-    if (!isDragging.current||!containerRef.current) return;
-    e.preventDefault();
-    const rect=containerRef.current.getBoundingClientRect();
-    const dx=((e.touches[0].clientX-startTouch.current.x)/rect.width)*100;
-    const dy=((e.touches[0].clientY-startTouch.current.y)/rect.height)*100;
-    onPositionChange(`${Math.round(clamp(startObjPos.current.x-dx,0,100))}% ${Math.round(clamp(startObjPos.current.y-dy,0,100))}%`);
-  }, [position, onPositionChange]);
-  const onTouchEnd = () => { isDragging.current=false; document.body.style.overflow=""; document.body.style.touchAction=""; };
-
-  useEffect(() => {
-    const el=containerRef.current; if (!el) return;
-    el.addEventListener("touchmove", onTouchMove, { passive:false });
-    return () => el.removeEventListener("touchmove", onTouchMove);
-  }, [onTouchMove]);
-  useEffect(() => () => { document.body.style.overflow=""; document.body.style.touchAction=""; }, []);
-
-  const cur=scale??1; const STEP=0.1; const MIN=0.5; const MAX=3;
+  const STEP=0.1; const MIN=fit === "contain" ? 0.5 : 1; const MAX=3;
+  const cur=clamp(scale, MIN, MAX);
   const zoomPct=Math.round(((cur-MIN)/(MAX-MIN))*100);
 
   return (
-    <div className="mb-5">
-      <div className="flex items-center justify-between mb-2">
-        <label className={LBL+" mb-0"}>Rasm sozlamalari</label>
-        <span className="text-[#2d5078] text-[10px]">{position} · {Math.round(cur*100)}%</span>
+    <div className="mb-5 bg-[#070f1e] border border-[#1a3050] rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <label className={LBL+" mb-0"}>Media sozlamalari va tartibi</label>
+
+        {/* Media fayllar orasida almashish (Tabs) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          {mediaList.map((m, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => onSelectIndex(idx)}
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                idx === currentIdx
+                  ? "bg-blue-600 border-blue-500 text-white shadow-md"
+                  : "bg-[#080f1a] border-[#0e2038] text-[#5b8ab0] hover:text-white"
+              }`}
+            >
+              {m.type === "video" ? "📹 Video" : `🖼 Rasm #${idx + 1}`}
+            </button>
+          ))}
+        </div>
       </div>
-      <div ref={containerRef} className="relative h-44 rounded-xl overflow-hidden border border-[#1a3050] select-none touch-none"
-        style={{ cursor:isDragging.current?"grabbing":"grab" }}
+
+      {/* Tartibini o'zgartirish tugmalari (Up / Down) */}
+      <div className="flex items-center justify-between mb-3 bg-[#080f1a] border border-[#0e2038] px-3 py-2 rounded-lg flex-wrap gap-2">
+        <span className="text-[11px] text-blue-300 font-bold">
+          Tanlangan: {currentItem.type === "video" ? "Video" : `Rasm #${currentIdx + 1}`} (Joylashuv o&apos;rni)
+        </span>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            disabled={currentIdx === 0}
+            onClick={() => onReorderMedia(currentIdx, currentIdx - 1)}
+            className="px-2.5 py-1 rounded-lg bg-[#0e2038] hover:bg-blue-600 disabled:opacity-30 text-white text-[10px] font-bold transition-all"
+          >
+            ⬆ Tepaga surish (Row 1 / Rasm)
+          </button>
+          <button
+            type="button"
+            disabled={currentIdx === mediaList.length - 1}
+            onClick={() => onReorderMedia(currentIdx, currentIdx + 1)}
+            className="px-2.5 py-1 rounded-lg bg-[#0e2038] hover:bg-blue-600 disabled:opacity-30 text-white text-[10px] font-bold transition-all"
+          >
+            ⬇ Pastga tushirish (Row 2 / Video)
+          </button>
+        </div>
+      </div>
+
+      {/* Live Preview & Drag Box */}
+      <div
+        ref={containerRef}
+        className="relative w-full rounded-xl overflow-hidden border border-[#1a3050] select-none touch-none mb-3 cursor-grab"
+        style={{ aspectRatio: mediaRatio }}
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
-        onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-        <img src={src} alt="pos" draggable={false} className="w-full h-full pointer-events-none"
-          style={{ objectFit:"cover", objectPosition:position, transform:`scale(${cur})`, transformOrigin:position, transition:isDragging.current?"none":"transform 0.15s ease" }} />
+      >
+        {currentItem.type === "video" ? (
+          <video
+            src={currentItem.url}
+            className={`w-full h-full pointer-events-none ${fit === "cover" ? "object-cover" : "object-contain"}`}
+            style={{ objectPosition: position, transform: `scale(${cur})`, transformOrigin: position }}
+            muted
+            playsInline
+          />
+        ) : (
+          <img
+            src={currentItem.url}
+            alt="pos"
+            draggable={false}
+            className={`w-full h-full pointer-events-none ${fit === "cover" ? "object-cover" : "object-contain"}`}
+            style={{ objectPosition: position, transform: `scale(${cur})`, transformOrigin: position, transition: dragging ? "none" : "transform 0.15s ease" }}
+          />
+        )}
+
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-5 h-5 rounded-full border-2 border-white/60 bg-black/25 backdrop-blur-sm" />
+          <div className="w-6 h-6 rounded-full border-2 border-white/70 bg-black/30 backdrop-blur-sm flex items-center justify-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-white" />
+          </div>
         </div>
         <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none">
-          <span className="bg-black/50 backdrop-blur-sm text-white/60 text-[10px] px-3 py-1 rounded-full">Pozitsiyani sozlash uchun suring</span>
+          <span className="bg-black/60 backdrop-blur-sm text-white/80 text-[10px] px-3 py-1 rounded-full font-bold">
+            Suring: {position}
+          </span>
         </div>
       </div>
-      <div className="flex items-center gap-3 mt-2.5 px-0.5">
-        <span className="text-[#2d5078] text-[10px] font-bold tracking-widest uppercase flex-shrink-0">Zoom</span>
-        <button type="button" onClick={() => onScaleChange(parseFloat(Math.max(MIN,cur-STEP).toFixed(2)))} disabled={cur<=MIN}
-          className="w-7 h-7 rounded-lg bg-[#0e2038] hover:bg-[#1a3050] disabled:opacity-30 text-[#5b8ab0] hover:text-white flex items-center justify-center transition-all flex-shrink-0">
-          <MdZoomOut size={16}/>
-        </button>
-        <div className="flex-1 relative h-7 flex items-center">
-          <div className="absolute inset-x-0 h-1 rounded-full bg-[#0e2038]" />
-          <div className="absolute left-0 h-1 rounded-full bg-blue-600 transition-all" style={{ width:`${zoomPct}%` }} />
-          <input type="range" min={MIN} max={MAX} step={STEP} value={cur}
-            onChange={e => onScaleChange(parseFloat(e.target.value))}
-            className="relative w-full appearance-none bg-transparent cursor-pointer" style={{ height:"28px" }} />
+
+      {/* Controls: Fit Mode & Zoom */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+        {/* Fit mode toggle */}
+        <div className="flex items-center gap-2">
+          <span className="text-[#2d5078] text-[10px] font-bold tracking-widest uppercase flex-shrink-0">Kadr turi:</span>
+          <button
+            type="button"
+            onClick={() => onUpdateMedia(currentIdx, normalizeCoverMedia({ ...currentItem, fit: "cover" }))}
+            className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+              fit === "cover"
+                ? "bg-blue-600 border-blue-500 text-white"
+                : "bg-[#080f1a] border-[#0e2038] text-[#5b8ab0]"
+            }`}
+          >
+            COVER (0 bo&apos;sh joy)
+          </button>
+          <button
+            type="button"
+            onClick={() => updateCurrent("fit", "contain")}
+            className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+              fit === "contain"
+                ? "bg-blue-600 border-blue-500 text-white"
+                : "bg-[#080f1a] border-[#0e2038] text-[#5b8ab0]"
+            }`}
+          >
+            CONTAIN (To&apos;liq)
+          </button>
         </div>
-        <button type="button" onClick={() => onScaleChange(parseFloat(Math.min(MAX,cur+STEP).toFixed(2)))} disabled={cur>=MAX}
-          className="w-7 h-7 rounded-lg bg-[#0e2038] hover:bg-[#1a3050] disabled:opacity-30 text-[#5b8ab0] hover:text-white flex items-center justify-center transition-all flex-shrink-0">
-          <MdZoomIn size={16}/>
-        </button>
-        {cur!==1 && <button type="button" onClick={() => onScaleChange(1)} className="text-[#2d5078] hover:text-blue-400 text-[10px] font-bold transition-colors flex-shrink-0">Reset</button>}
+
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-2">
+          <span className="text-[#2d5078] text-[10px] font-bold tracking-widest uppercase flex-shrink-0">Zoom:</span>
+          <button type="button" onClick={() => updateCurrent("scale", parseFloat(Math.max(MIN, cur - STEP).toFixed(2)))} disabled={cur <= MIN}
+            className="w-7 h-7 rounded-lg bg-[#0e2038] hover:bg-[#1a3050] disabled:opacity-30 text-[#5b8ab0] hover:text-white flex items-center justify-center transition-all flex-shrink-0">
+            <MdZoomOut size={16}/>
+          </button>
+          <div className="flex-1 relative h-7 flex items-center">
+            <input type="range" min={MIN} max={MAX} step={STEP} value={cur}
+              onChange={e => updateCurrent("scale", parseFloat(e.target.value))}
+              className="relative w-full appearance-none bg-transparent cursor-pointer" style={{ height: "28px" }} />
+          </div>
+          <button type="button" onClick={() => updateCurrent("scale", parseFloat(Math.min(MAX, cur + STEP).toFixed(2)))} disabled={cur >= MAX}
+            className="w-7 h-7 rounded-lg bg-[#0e2038] hover:bg-[#1a3050] disabled:opacity-30 text-[#5b8ab0] hover:text-white flex items-center justify-center transition-all flex-shrink-0">
+            <MdZoomIn size={16}/>
+          </button>
+          {cur !== 1 && (
+            <button type="button" onClick={() => updateCurrent("scale", 1)} className="text-[#2d5078] hover:text-blue-400 text-[10px] font-bold transition-colors flex-shrink-0">
+              Reset
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -323,7 +432,13 @@ function AdminPanel({ onLogout }) {
   const [notifStatus, setNotifStatus] = useState("idle");
   const [sendNotif, setSendNotif]     = useState(true);
 
-  // ── Tarjima holati ──
+  // Tahrirlash rejimi: null bo'lsa "yangi qo'shish", aks holda shu id tahrirlanmoqda
+  const [editingId, setEditingId] = useState(null);
+  const formTopRef = useRef(null);
+
+  // Tanlangan media indeksi
+  const [selectedMediaIdx, setSelectedMediaIdx] = useState(0);
+
   const [translating, setTranslating] = useState(false);
   const [translateError, setTranslateError] = useState("");
 
@@ -332,7 +447,6 @@ function AdminPanel({ onLogout }) {
   const set = (k,v) => setForm(p => ({ ...p, [k]:v }));
   const setCategory = (uzCat) => { set("category_uz",uzCat); set("category_en",CAT_MAP[uzCat]?.en||uzCat); set("category_ru",CAT_MAP[uzCat]?.ru||uzCat); };
 
-  // ── Avtomatik tarjima funksiyasi ──
   const handleTranslate = async () => {
     if (!form.title_uz || form.title_uz.trim().length < 2) return;
     setTranslating(true);
@@ -352,13 +466,11 @@ function AdminPanel({ onLogout }) {
     }
   };
 
-  // ── UZ sarlavhadan chiqilganda avtomatik tarjima ──
   const handleTitleUzBlur = (e) => {
     const val = e.target.value.trim();
     if (val.length >= 2) handleTranslate();
   };
 
-  // ── Excerpt UZ dan chiqqanda faqat excerpt tarjima qilish ──
   const handleExcerptUzBlur = async (e) => {
     const val = e.target.value.trim();
     if (!val || val.length < 2) return;
@@ -396,23 +508,33 @@ function AdminPanel({ onLogout }) {
     video.src = url;
   });
 
-  const removeMedia = (idx) => setForm(p => ({ ...p, media: p.media.filter((_, i) => i !== idx) }));
+  const removeMedia = (idx) => {
+    setForm(p => ({ ...p, media: p.media.filter((_, i) => i !== idx) }));
+    setSelectedMediaIdx(0);
+  };
 
-  const updatePrimaryPosition = (v) => setForm(p => {
-    if (!p.media[0]) return p;
-    const media = [...p.media]; media[0] = { ...media[0], position: v };
-    return { ...p, media };
-  });
-  const updatePrimaryScale = (v) => setForm(p => {
-    if (!p.media[0]) return p;
-    const media = [...p.media]; media[0] = { ...media[0], scale: v };
-    return { ...p, media };
-  });
+  const updateMediaItem = (idx, updatedItem) => {
+    setForm(p => {
+      const media = [...p.media];
+      media[idx] = updatedItem;
+      return { ...p, media };
+    });
+  };
 
-  // Bir nechta rasm va (ko'pi bilan 1 ta) video birga yuklanadi
+  const reorderMediaItems = (fromIdx, toIdx) => {
+    setForm(p => {
+      if (toIdx < 0 || toIdx >= p.media.length) return p;
+      const media = [...p.media];
+      const item = media.splice(fromIdx, 1)[0];
+      media.splice(toIdx, 0, item);
+      return { ...p, media };
+    });
+    setSelectedMediaIdx(toIdx);
+  };
+
   const handleFilesUpload = async (e) => {
     const files = Array.from(e.target.files || []);
-    e.target.value = ""; // bir xil faylni qayta tanlash imkonini saqlaydi
+    e.target.value = "";
     if (!files.length) return;
 
     const existingVideoCount = form.media.filter(m => m.type === "video").length;
@@ -437,7 +559,7 @@ function AdminPanel({ onLogout }) {
           const res = await fetch("https://api.imgbb.com/1/upload", { method: "POST", body: fd });
           const data = await res.json();
           if (data.success) {
-            newItems.push({ type: "image", url: data.data.url, w: dim.w, h: dim.h, position: "50% 50%", scale: 1 });
+            newItems.push({ type: "image", url: data.data.url, w: dim.w, h: dim.h, position: "50% 50%", scale: 1, fit: "contain" });
           } else throw new Error("Yuklanmadi");
         } catch (err) { alert(`${file.name}: xato — ${err.message}`); }
       } else {
@@ -445,7 +567,7 @@ function AdminPanel({ onLogout }) {
         try {
           const dim = await getVideoDimensions(file);
           const url = await uploadVideoToStorage(file, (pct) => setUploadProgress(pct));
-          newItems.push({ type: "video", url, w: dim.w, h: dim.h });
+          newItems.push({ type: "video", url, w: dim.w, h: dim.h, position: "50% 50%", scale: 1, fit: "contain" });
         } catch (err) { alert(`${file.name}: video yuklashda xato — ${err.message}`); }
       }
       setUploadProgress(Math.round(((i + 1) / files.length) * 100));
@@ -455,19 +577,65 @@ function AdminPanel({ onLogout }) {
     setUploading(false);
   };
 
+  /* ─── Tahrirlashni boshlash / bekor qilish ─────────────────────────── */
+
+  const startEdit = (item) => {
+    const media = (item.media && item.media.length > 0)
+      ? item.media.map(normalizeCoverMedia)
+      : (item.img ? [normalizeCoverMedia({
+          type: item.mediaType || "image",
+          url: item.img,
+          w: null,
+          h: null,
+          position: item.imgPosition || "50% 50%",
+          scale: item.imgScale ?? 1,
+          fit: "contain",
+        })] : []);
+
+    setForm({
+      title_uz: item.title?.uz || "",
+      title_en: item.title?.en || "",
+      title_ru: item.title?.ru || "",
+      excerpt_uz: item.excerpt?.uz || "",
+      excerpt_en: item.excerpt?.en || "",
+      excerpt_ru: item.excerpt?.ru || "",
+      category_uz: item.category?.uz || "Musobaqa",
+      category_en: item.category?.en || CAT_MAP[item.category?.uz]?.en || "Tournament",
+      category_ru: item.category?.ru || CAT_MAP[item.category?.uz]?.ru || "Турнир",
+      media,
+      date_uz: item.date_uz || "",
+      date_en: item.date_en || "",
+      date_ru: item.date_ru || "",
+    });
+    setEditingId(item.id);
+    setSelectedMediaIdx(0);
+    setSendNotif(false);
+    setTranslateError("");
+    formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const cancelEdit = () => {
+    setForm(EMPTY);
+    setEditingId(null);
+    setSelectedMediaIdx(0);
+    setSendNotif(true);
+    setUploadProgress(0);
+  };
+
   const handleSubmit = async () => {
     if (!form.title_uz||form.media.length===0) { alert("Majburiy: Sarlavha (UZ), kamida bitta Rasm/Video"); return; }
     if (!form.date_uz&&!form.date_en&&!form.date_ru) { alert("Kamida bitta sana kiriting!"); return; }
     setLoading(true);
+    const wasEditing = !!editingId;
     try {
       const now=new Date();
-      const primary = form.media[0];
+      const media = form.media.map(normalizeCoverMedia);
+      const primary = media[0];
       const newsData = {
         title:       { uz:form.title_uz,    en:form.title_en,    ru:form.title_ru    },
         excerpt:     { uz:form.excerpt_uz,  en:form.excerpt_en,  ru:form.excerpt_ru  },
         category:    { uz:form.category_uz, en:form.category_en, ru:form.category_ru },
-        media:       form.media,
-        // Orqaga moslik uchun — eski komponentlar shu maydonlardan ham foydalanadi
+        media:       media,
         img:         primary.url,
         mediaType:   primary.type,
         imgPosition: primary.position || "50% 50%",
@@ -476,15 +644,21 @@ function AdminPanel({ onLogout }) {
         date_uz:     form.date_uz,
         date_en:     form.date_en,
         date_ru:     form.date_ru,
-        postedAt:    now.toISOString(),
       };
 
-      await addNewsToDb(newsData);
+      if (wasEditing) {
+        await updateNewsInDb(editingId, newsData);
+      } else {
+        newsData.postedAt = now.toISOString();
+        await addNewsToDb(newsData);
+      }
+
       await refreshNews();
-      setForm(EMPTY); setUploadProgress(0);
+      setForm(EMPTY); setUploadProgress(0); setSelectedMediaIdx(0);
+      setEditingId(null);
       setSuccess(true); setTimeout(() => setSuccess(false), 3000);
 
-      if (sendNotif) {
+      if (sendNotif && !wasEditing) {
         setNotifStatus("sending");
         try {
           const notifyRes = await fetch("/api/notify-subscribers", {
@@ -520,7 +694,11 @@ function AdminPanel({ onLogout }) {
   const handleDelete = async (id) => {
     if (!confirm("O'chirishni tasdiqlaysizmi?")) return;
     setDeleting(id);
-    try { await deleteNewsFromDb(id); await refreshNews(); }
+    try {
+      await deleteNewsFromDb(id);
+      await refreshNews();
+      if (editingId === id) cancelEdit();
+    }
     catch(err) { alert("Xato: "+err.message); }
     finally { setDeleting(null); }
   };
@@ -533,7 +711,7 @@ function AdminPanel({ onLogout }) {
       <div className="relative max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 sm:mb-10">
+        <div className="flex items-center justify-between mb-8 sm:mb-10" ref={formTopRef}>
           <div>
             <p className="text-[#2d5078] text-[10px] font-black tracking-[0.25em] uppercase mb-1">WBK & BOKA</p>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Admin Panel</h1>
@@ -545,17 +723,30 @@ function AdminPanel({ onLogout }) {
         </div>
 
         {/* Form */}
-        <div className="bg-[#080f1a] rounded-2xl border border-[#0e2038] p-4 sm:p-6 mb-6 sm:mb-8">
-          <h2 className="text-sm font-bold mb-6 flex items-center gap-2 text-[#5b8ab0]">
-            <MdAddCircleOutline className="text-blue-400 text-lg"/>
-            Yangi yangilik qo'shish
-          </h2>
+        <div className={`bg-[#080f1a] rounded-2xl border p-4 sm:p-6 mb-6 sm:mb-8 transition-colors ${editingId ? "border-blue-500/40" : "border-[#0e2038]"}`}>
+          <div className="flex items-center justify-between mb-6 gap-2 flex-wrap">
+            <h2 className="text-sm font-bold flex items-center gap-2 text-[#5b8ab0]">
+              {editingId ? <MdEdit className="text-blue-400 text-lg"/> : <MdAddCircleOutline className="text-blue-400 text-lg"/>}
+              {editingId ? "Yangilikni tahrirlash" : "Yangi yangilik qo'shish"}
+            </h2>
+            {editingId && (
+              <button type="button" onClick={cancelEdit}
+                className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-[#0e2038] text-[#5b8ab0] hover:text-red-400 hover:border-red-500/30 transition-all">
+                <MdClose size={13}/> Tahrirlashni bekor qilish
+              </button>
+            )}
+          </div>
+
+          {editingId && (
+            <div className="mb-5 bg-blue-500/10 border border-blue-500/25 rounded-xl px-4 py-2.5 text-blue-300 text-[11px] font-bold flex items-center gap-2">
+              <MdEdit size={14}/> Siz mavjud yangilikni tahrirlayapsiz. O&apos;zgarishlar saqlangach, yangilik yangilanadi.
+            </div>
+          )}
 
           {/* Sarlavha */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <label className={LBL+" mb-0"}>Sarlavha *</label>
-              {/* Qo'lda tarjima tugmasi */}
               <button
                 type="button"
                 onClick={handleTranslate}
@@ -591,13 +782,11 @@ function AdminPanel({ onLogout }) {
                 </div>
               ))}
             </div>
-            {/* Tarjima xato xabari */}
             {translateError && (
               <div className="mt-2 bg-red-500/10 border border-red-500/25 rounded-xl px-3 py-2 text-red-400 text-[11px] font-bold flex items-center gap-1.5">
                 <MdErrorOutline size={13}/>{translateError}
               </div>
             )}
-            {/* Tarjima muvaffaqiyat xabari */}
             {!translating && !translateError && form.title_ru && form.title_en && (
               <div className="mt-2 flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
                 <MdCheckCircle size={12}/> AI tarjima tayyor
@@ -655,21 +844,24 @@ function AdminPanel({ onLogout }) {
 
             <div className="grid grid-cols-3 gap-2">
               {form.media.map((m, idx) => (
-                <div key={idx} className="relative h-24 rounded-lg overflow-hidden bg-[#070f1e] border border-[#0e2038] group">
+                <div
+                  key={idx}
+                  onClick={() => setSelectedMediaIdx(idx)}
+                  className={`relative h-24 rounded-lg overflow-hidden bg-[#070f1e] border cursor-pointer group transition-all ${
+                    selectedMediaIdx === idx ? "border-blue-500 ring-2 ring-blue-500/40" : "border-[#0e2038]"
+                  }`}
+                >
                   {m.type === "video" ? (
                     <video src={m.url} className="w-full h-full object-cover pointer-events-none" muted playsInline />
                   ) : (
                     <img src={m.url} alt="" className="w-full h-full pointer-events-none"
-                      style={{ objectFit:"cover", objectPosition:m.position||"50% 50%", transform:`scale(${m.scale??1})`, transformOrigin:m.position||"50% 50%" }} />
+                      style={{ objectFit: m.fit || "contain", objectPosition: m.position || "50% 50%", transform: `scale(${getSafeMediaScale(m)})` }} />
                   )}
-                  {idx === 0 && (
-                    <span className="absolute top-1 left-1 bg-blue-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded">ASOSIY</span>
-                  )}
-                  {m.type === "video" && (
-                    <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">VIDEO</span>
-                  )}
-                  <button type="button" onClick={() => removeMedia(idx)}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-red-500 text-white flex items-center justify-center text-xs transition-colors">
+                  <span className="absolute top-1 left-1 bg-black/70 text-white text-[8px] font-black px-1.5 py-0.5 rounded">
+                    #{idx + 1} {m.type === "video" ? "VIDEO" : "RASM"}
+                  </span>
+                  <button type="button" onClick={(e) => { e.stopPropagation(); removeMedia(idx); }}
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-red-500 text-white flex items-center justify-center text-xs transition-colors z-10">
                     ×
                   </button>
                 </div>
@@ -697,33 +889,55 @@ function AdminPanel({ onLogout }) {
             )}
           </div>
 
-          {form.media[0]?.type === "image" && !uploading && (
-            <ImagePositioner src={form.media[0].url} position={form.media[0].position} scale={form.media[0].scale}
-              onPositionChange={updatePrimaryPosition} onScaleChange={updatePrimaryScale} />
+          {/* Media sozlash va tartib paneli */}
+          {form.media.length > 0 && !uploading && (
+            <MediaPositioner
+              mediaList={form.media}
+              selectedIndex={selectedMediaIdx}
+              onSelectIndex={setSelectedMediaIdx}
+              onUpdateMedia={updateMediaItem}
+              onReorderMedia={reorderMediaItems}
+            />
           )}
 
-          {/* Bildirishnoma toggle */}
-          <div className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-xl border ${sendNotif?"border-blue-500/30 bg-blue-500/10":"border-[#0e2038] bg-[#070f1e]"}`}>
-            <MdNotifications className={`text-lg flex-shrink-0 ${sendNotif?"text-blue-400":"text-[#2d5078]"}`} />
-            <div className="flex-1">
-              <p className={`text-xs font-bold ${sendNotif?"text-blue-300":"text-[#5b8ab0]"}`}>Obunchilarga bildirishnoma yuborish</p>
-              <p className="text-[10px] text-[#2d5078] mt-0.5">Email + Push notification</p>
+          {/* Bildirishnoma toggle — faqat yangi yangilik qo'shishda ko'rsatiladi */}
+          {!editingId && (
+            <div className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-xl border ${sendNotif?"border-blue-500/30 bg-blue-500/10":"border-[#0e2038] bg-[#070f1e]"}`}>
+              <MdNotifications className={`text-lg flex-shrink-0 ${sendNotif?"text-blue-400":"text-[#2d5078]"}`} />
+              <div className="flex-1">
+                <p className={`text-xs font-bold ${sendNotif?"text-blue-300":"text-[#5b8ab0]"}`}>Obunchilarga bildirishnoma yuborish</p>
+                <p className="text-[10px] text-[#2d5078] mt-0.5">Email + Push notification</p>
+              </div>
+              <button type="button" onClick={() => setSendNotif(v=>!v)}
+                className={`w-10 h-6 rounded-full transition-all flex-shrink-0 relative ${sendNotif?"bg-blue-600":"bg-[#1a3050]"}`}>
+                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${sendNotif?"left-5":"left-1"}`} />
+              </button>
             </div>
-            <button type="button" onClick={() => setSendNotif(v=>!v)}
-              className={`w-10 h-6 rounded-full transition-all flex-shrink-0 relative ${sendNotif?"bg-blue-600":"bg-[#1a3050]"}`}>
-              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${sendNotif?"left-5":"left-1"}`} />
-            </button>
-          </div>
+          )}
 
           {/* Submit */}
-          <button onClick={handleSubmit} disabled={loading||uploading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-[#0e2038] disabled:text-[#2d5078] disabled:cursor-not-allowed text-white font-black rounded-xl text-xs tracking-[0.18em] uppercase transition-all">
-            {loading?"Saqlanmoqda...":uploading?"Fayllar yuklanmoqda...":"Yangilik qo'shish →"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={handleSubmit} disabled={loading||uploading}
+              className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-[#0e2038] disabled:text-[#2d5078] disabled:cursor-not-allowed text-white font-black rounded-xl text-xs tracking-[0.18em] uppercase transition-all">
+              {loading
+                ? (editingId ? "Saqlanmoqda..." : "Saqlanmoqda...")
+                : uploading
+                  ? "Fayllar yuklanmoqda..."
+                  : editingId
+                    ? "O'zgarishlarni saqlash →"
+                    : "Yangilik qo'shish →"}
+            </button>
+            {editingId && (
+              <button onClick={cancelEdit} disabled={loading}
+                className="py-3 px-4 bg-[#0e2038] hover:bg-[#152a48] disabled:opacity-40 text-[#5b8ab0] hover:text-white font-black rounded-xl text-xs tracking-[0.18em] uppercase transition-all">
+                Bekor qilish
+              </button>
+            )}
+          </div>
 
           {success && (
             <div className="mt-3 bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-3 text-emerald-400 text-sm font-bold flex items-center justify-center gap-2">
-              <MdCheckCircle className="text-lg"/> Muvaffaqiyatli qo'shildi!
+              <MdCheckCircle className="text-lg"/> {editingId ? "Muvaffaqiyatli yangilandi!" : "Muvaffaqiyatli qo'shildi!"}
             </div>
           )}
 
@@ -753,15 +967,18 @@ function AdminPanel({ onLogout }) {
           </h2>
           {newsList.length===0 ? (
             <div className="bg-[#080f1a] border border-[#0e2038] rounded-2xl py-16 text-center">
-              <p className="text-[#2d5078] text-sm">Hozircha yangilik yo'q</p>
+              <p className="text-[#2d5078] text-sm">Hozircha yangilik yo&apos;q</p>
             </div>
           ) : (
             <div className="space-y-2.5">
               {newsList.map(item => (
-                <div key={item.id} className="bg-[#080f1a] border border-[#0e2038] rounded-xl p-3 flex items-center gap-3 hover:border-[#1a3050] transition-colors">
+                <div key={item.id}
+                  className={`bg-[#080f1a] border rounded-xl p-3 flex items-center gap-3 transition-colors ${
+                    editingId === item.id ? "border-blue-500/50 ring-1 ring-blue-500/30" : "border-[#0e2038] hover:border-[#1a3050]"
+                  }`}>
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#070f1e]">
                     <img src={item.img} alt="" className="w-full h-full pointer-events-none"
-                      style={{ objectFit:"cover", objectPosition:item.imgPosition||"50% 50%", transform:`scale(${item.imgScale??1})`, transformOrigin:item.imgPosition||"50% 50%" }}
+                      style={{ objectFit: item.media?.[0]?.fit || "contain", objectPosition: item.imgPosition||"50% 50%", transform:`scale(${getSafeMediaScale({ fit: item.media?.[0]?.fit || "contain", scale: item.imgScale ?? 1 })})` }}
                       onError={e => { e.currentTarget.style.display="none"; }} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -772,6 +989,10 @@ function AdminPanel({ onLogout }) {
                       <span className="text-[10px] text-[#2d5078]">{item.date}</span>
                     </div>
                   </div>
+                  <button onClick={() => startEdit(item)}
+                    className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 hover:bg-blue-500/25 text-blue-400/70 hover:text-blue-300 flex items-center justify-center transition-all border border-transparent hover:border-blue-500/20">
+                    <MdEdit className="w-4 h-4"/>
+                  </button>
                   <button onClick={() => handleDelete(item.id)} disabled={deleting===item.id}
                     className="flex-shrink-0 w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/25 text-red-500/50 hover:text-red-400 flex items-center justify-center transition-all border border-transparent hover:border-red-500/20">
                     {deleting===item.id ? <span className="text-[10px]">...</span> : <MdDelete className="w-4 h-4"/>}

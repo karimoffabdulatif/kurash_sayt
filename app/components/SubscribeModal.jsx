@@ -6,7 +6,6 @@ import { FiX, FiMail, FiCheckCircle } from "react-icons/fi";
 import { MdNotifications } from "react-icons/md";
 
 const STORAGE_KEY = "wbk_subscribed_v1";
-const SCROLL_THRESHOLD = 80; // shuncha pikseldan keyin "scroll qilindi" hisoblanadi
 
 const T = {
   title: {
@@ -31,6 +30,11 @@ const T = {
     en: "Thank you! You've successfully subscribed.",
     ru: "Спасибо! Вы успешно подписались.",
   },
+  alreadySubscribed: {
+    uz: "Siz allaqachon obuna bo'lgansiz.",
+    en: "You are already subscribed.",
+    ru: "Вы уже подписаны.",
+  },
   invalidEmail: {
     uz: "Iltimos, to'g'ri email manzil kiriting",
     en: "Please enter a valid email address",
@@ -48,31 +52,31 @@ const T = {
   },
 };
 
-const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
 
 export default function SubscribeModal() {
   const { darkMode, language } = useApp();
   const [visible, setVisible]     = useState(false);
-  const [dismissed, setDismissed] = useState(false); // shu tashrif uchun × bosilganmi
+  const [dismissed, setDismissed] = useState(false); // shu seans uchun yopilganmi
   const [email, setEmail]         = useState("");
   const [status, setStatus]       = useState("idle"); // idle | loading | success | error
   const [errorMsg, setErrorMsg]   = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
-  // Allaqachon obuna bo'lganmi — localStorage orqali tekshiramiz
+  const lang = language || "uz";
+
+  // Obuna bo'lmagan foydalanuvchiga har kirganida modal ko'rsatiladi
   useEffect(() => {
     let already = false;
     try { already = localStorage.getItem(STORAGE_KEY) === "1"; } catch {}
-    if (already) return; // hech qachon ko'rsatilmaydi
+    if (already) return; // Allaqachon obuna bo'lsa ko'rsatilmaydi
 
-    const onScroll = () => {
-      if (window.scrollY > SCROLL_THRESHOLD) {
-        setVisible(true);
-        window.removeEventListener("scroll", onScroll);
-      }
-    };
+    // Saytga kirganda avtomatik ochiladi
+    const timer = setTimeout(() => {
+      setVisible(true);
+    }, 600);
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -84,20 +88,29 @@ export default function SubscribeModal() {
     e.preventDefault();
     if (!isValidEmail(email)) {
       setStatus("error");
-      setErrorMsg(T.invalidEmail[language]);
+      setErrorMsg(T.invalidEmail[lang] || T.invalidEmail.uz);
       return;
     }
     setStatus("loading");
     setErrorMsg("");
     try {
-      await addSubscriber({ email, language });
-      // "already_subscribed" bo'lsa ham bu qurilmada obuna bo'ldi deb belgilaymiz
+      const res = await addSubscriber({ email, language: lang });
+      
+      // Obuna bo'lgandan so'ng localStorage ga saqlaymiz, shunda qaytib ko'rsatilmaydi
       try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+
+      if (res && res.reason === "already_subscribed") {
+        setSuccessMsg(T.alreadySubscribed[lang] || T.alreadySubscribed.uz);
+      } else {
+        setSuccessMsg(T.success[lang] || T.success.uz);
+      }
+
       setStatus("success");
-      setTimeout(() => setVisible(false), 1800);
+      setTimeout(() => setVisible(false), 2000);
     } catch (err) {
+      console.error("Obuna bo'lishda xato:", err);
       setStatus("error");
-      setErrorMsg(T.genericError[language]);
+      setErrorMsg(T.genericError[lang] || T.genericError.uz);
     }
   };
 
@@ -140,16 +153,16 @@ export default function SubscribeModal() {
           </div>
 
           <h2 className={`font-black text-xl sm:text-2xl mb-2 ${titleC}`}>
-            {T.title[language]}
+            {T.title[lang] || T.title.uz}
           </h2>
           <p className={`text-sm leading-relaxed mb-6 ${textC}`}>
-            {T.subtitle[language]}
+            {T.subtitle[lang] || T.subtitle.uz}
           </p>
 
           {status === "success" ? (
             <div className={`flex flex-col items-center gap-2 py-4 ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>
-              <FiCheckCircle className="w-9 h-9" />
-              <p className="font-bold text-sm">{T.success[language]}</p>
+              <FiCheckCircle className="w-9 h-9 animate-bounce" />
+              <p className="font-bold text-sm">{successMsg}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="text-left">
@@ -160,7 +173,7 @@ export default function SubscribeModal() {
                   required
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
-                  placeholder={T.placeholder[language]}
+                  placeholder={T.placeholder[lang] || T.placeholder.uz}
                   className="flex-1 bg-transparent outline-none text-sm min-w-0"
                   disabled={status === "loading"}
                 />
@@ -175,11 +188,11 @@ export default function SubscribeModal() {
                 disabled={status === "loading"}
                 className="w-full bg-[#0f2a5e] hover:bg-blue-800 active:bg-blue-900 disabled:opacity-60 text-white font-bold text-sm py-3 rounded-xl transition-colors mt-1"
               >
-                {status === "loading" ? T.subscribing[language] : T.subscribe[language]}
+                {status === "loading" ? (T.subscribing[lang] || T.subscribing.uz) : (T.subscribe[lang] || T.subscribe.uz)}
               </button>
 
               <p className={`text-[11px] text-center mt-4 ${darkMode ? "text-blue-400/50" : "text-slate-400"}`}>
-                {T.privacy[language]}
+                {T.privacy[lang] || T.privacy.uz}
               </p>
             </form>
           )}

@@ -31,19 +31,29 @@ export async function POST(request) {
     const ipHash = hashIP(ip);
     const logId  = `${newsId}_${ipHash}`;
 
+    const newsRef = adminDb.collection("news").doc(newsId);
+    const newsSnap = await newsRef.get();
+
+    if (!newsSnap.exists) {
+      return NextResponse.json(
+        { counted: false, reason: "news_not_found" },
+        { status: 404 }
+      );
+    }
+
     const logRef  = adminDb.collection("views_log").doc(logId);
     const logSnap = await logRef.get();
     const now     = Date.now();
 
     if (logSnap.exists) {
-      const lastSeen = logSnap.data().lastSeen?._seconds * 1000 ?? 0;
+      const lastSeenAt = logSnap.data().lastSeen;
+      const lastSeen = lastSeenAt?.toMillis?.() ?? (lastSeenAt?._seconds ?? 0) * 1000;
       if (now - lastSeen < COOLDOWN_MS) {
         return NextResponse.json({ counted: false, reason: "cooldown" });
       }
     }
 
     // Parallel: views +1 va log yangilash
-    const newsRef = adminDb.collection("news").doc(newsId);
     await Promise.all([
       newsRef.update({ views: FieldValue.increment(1) }),
       logRef.set({ newsId, ipHash, lastSeen: FieldValue.serverTimestamp() }),
