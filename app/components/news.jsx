@@ -8,6 +8,8 @@ import { HiStar } from "react-icons/hi";
 import { FiArrowUpRight, FiEye } from "react-icons/fi";
 import { MdArrowForward, MdPlayCircleFilled } from "react-icons/md";
 import { incrementView } from "../lib/newsService";
+import { getMediaArray } from "../lib/mediaUtils";
+import MediaGallery from "./MediaGallery";
 
 const TICKER_WORDS = [
   "WBK", "NEWS", "DUNYO BELBOGLI KURASH", "NEWS", "WORLD CHAMPIONSHIP 2026",
@@ -122,31 +124,18 @@ export default function News() {
               ref={featuredRef}
               onMouseEnter={() => setHov(true)}
               onMouseLeave={() => setHov(false)}
-              className={`grid grid-cols-1 lg:grid-cols-2 rounded-2xl overflow-hidden ${cardBg} border ${borderC} cursor-pointer transition-all duration-300`}
+              className={`grid grid-cols-1 lg:grid-cols-2 lg:items-stretch rounded-2xl overflow-hidden ${cardBg} border ${borderC} cursor-pointer transition-all duration-300`}
               style={{ boxShadow: shadow(hov) }}
             >
-              {/* Image */}
-              <div className="relative overflow-hidden h-64 sm:h-80 lg:h-auto" style={{ minHeight: "420px" }}>
-                {featured.mediaType === "video" ? (
-                  <>
-                    <video src={featured.img} className="absolute inset-0 w-full h-full object-cover" muted playsInline
-                      style={{ transform: hov ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                        <div className="w-0 h-0 border-y-[9px] border-y-transparent border-l-[15px] border-l-white ml-1" />
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="hidden lg:block absolute inset-0">
-                      <img src={featured.img} alt={featured.title[language]} className="w-full h-full object-cover"
-                        style={{ objectPosition: featured.imgPosition || "center", transform: hov ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
-                    </div>
-                    <img src={featured.img} alt={featured.title[language]} className="lg:hidden w-full h-full object-cover"
-                      style={{ objectPosition: featured.imgPosition || "center", transform: hov ? "scale(1.04)" : "scale(1)", transition: "transform .6s ease" }} />
-                  </>
-                )}
+              {/* Media — o'lcham rasm/videoning o'z proporsiyasidan olinadi */}
+              <MediaGallery
+                media={getMediaArray(featured)}
+                alt={featured.title[language]}
+                hovered={hov}
+                className="lg:h-full"
+                minRatio={0.5}
+                maxRatio={1.9}
+              >
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/70 via-transparent to-transparent pointer-events-none" />
                 <span className="absolute top-4 left-4 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1.5 rounded-sm">
                   {featured.category?.[language] ?? ""}
@@ -161,7 +150,7 @@ export default function News() {
                   <FiEye className="w-3 h-3" />
                   {featured.views ?? 0}
                 </div>
-              </div>
+              </MediaGallery>
 
               {/* Content */}
               <div className={`flex flex-col justify-between p-6 sm:p-8 lg:p-10 ${cardBg} transition-colors duration-300`}>
@@ -266,21 +255,13 @@ function SmallCard({ news, index, hovSmall, setHovSmall, darkMode, language,
         className={`rounded-2xl overflow-hidden ${cardBg} border ${borderC} cursor-pointer transition-all duration-300`}
         style={{ boxShadow: shadow(hovSmall === index) }}
       >
-        <div className="relative overflow-hidden h-52 sm:h-60">
-          {news.mediaType === "video" ? (
-            <>
-              <video src={news.img} className="w-full h-full object-cover" muted playsInline
-                style={{ transform: hovSmall === index ? "scale(1.05)" : "scale(1)", transition: "transform .5s ease" }} />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                  <div className="w-0 h-0 border-y-[7px] border-y-transparent border-l-[12px] border-l-white ml-1" />
-                </div>
-              </div>
-            </>
-          ) : (
-            <img src={news.img} alt={news.title[language]} className="w-full h-full object-cover"
-              style={{ objectPosition: news.imgPosition || "center", transform: hovSmall === index ? "scale(1.05)" : "scale(1)", transition: "transform .5s ease" }} />
-          )}
+        <MediaGallery
+          media={getMediaArray(news)}
+          alt={news.title[language]}
+          hovered={hovSmall === index}
+          minRatio={0.65}
+          maxRatio={1.9}
+        >
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f2a5e]/50 to-transparent pointer-events-none" />
           <span className="absolute top-3 left-3 bg-[#0f2a5e] text-white text-[9px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-sm">
             {news.category?.[language] ?? ""}
@@ -290,7 +271,7 @@ function SmallCard({ news, index, hovSmall, setHovSmall, darkMode, language,
             <FiEye className="w-3 h-3" />
             {news.views ?? 0}
           </div>
-        </div>
+        </MediaGallery>
 
         <div className={`p-4 sm:p-5 ${cardBg} transition-colors duration-300`}>
           <div className="flex items-center gap-2 mb-2">
