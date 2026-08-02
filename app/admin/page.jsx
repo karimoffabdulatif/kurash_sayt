@@ -4,8 +4,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { addNewsToDb, deleteNewsFromDb } from "../lib/newsService";
 import { uploadVideoToStorage } from "../lib/videoService";
 import { useApp } from "../contex/AppContext";
-import { getAllSubscribers } from "../lib/subscriberService";
-import { sendNewsToAllSubscribers } from "../lib/emailService";
 import { getAllPushTokens, sendPushToAll } from "../lib/pushService";
 import {
   MdLockOutline, MdVisibility, MdVisibilityOff, MdErrorOutline,
@@ -489,14 +487,18 @@ function AdminPanel({ onLogout }) {
       if (sendNotif) {
         setNotifStatus("sending");
         try {
-          const subscribers = await getAllSubscribers();
-          if (subscribers.length > 0) {
-            await sendNewsToAllSubscribers({
-              subscribers,
+          const notifyRes = await fetch("/api/notify-subscribers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
               newsTitle:   newsData.title,
               newsExcerpt: newsData.excerpt,
               newsDate:    newsData.date,
-            });
+            }),
+          });
+          if (!notifyRes.ok) {
+            const errData = await notifyRes.json().catch(() => ({}));
+            throw new Error(errData.error || "notify_failed");
           }
           await sendPushToAll({
             title: newsData.title,

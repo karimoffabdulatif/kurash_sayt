@@ -1,7 +1,9 @@
 // lib/emailService.js
 // Brevo API orqali email yuborish
 
-const BREVO_API_KEY = process.env.NEXT_PUBLIC_BREVO_API_KEY;
+// Diqqat: bu kalit endi faqat serverda (API route'lar ichida) ishlatiladi,
+// shuning uchun NEXT_PUBLIC_ prefiksisiz — brauzerga chiqarilmaydi.
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const SENDER_EMAIL  = "kabdulatif328@gmail.com";
 const SENDER_NAME   = "WBK & BOKA";
 

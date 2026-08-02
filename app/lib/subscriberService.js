@@ -9,21 +9,24 @@ import {
 
 const COL = "subscribers";
 
-/* ── Yangi obunchi qo'shish ── */
+/* ── Yangi obunchi qo'shish ──
+   Eslatma: bu endi to'g'ridan-to'g'ri Firestore'ga yozmaydi (buni Firestore
+   Security Rules bloklashi mumkin edi va aynan shu "Xatolik yuz berdi"
+   xatosiga sabab bo'lgan). Endi imtiyozli (admin) huquqqa ega server API
+   route orqali yoziladi — /app/api/subscribe/route.js */
 export async function addSubscriber({ email, name = "", language = "uz" }) {
-  // Avval bu email allaqachon bormi tekshir
-  const exists = await isSubscribed(email);
-  if (exists) return { success: false, reason: "already_subscribed" };
-
-  await addDoc(collection(db, COL), {
-    email:     email.toLowerCase().trim(),
-    name,
-    language,
-    createdAt: serverTimestamp(),
-    active:    true,
+  const res = await fetch("/api/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, name, language }),
   });
 
-  return { success: true };
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "subscribe_failed");
+  }
+
+  return res.json(); // { success: true } yoki { success:false, reason:"already_subscribed" }
 }
 
 /* ── Email allaqachon obunami? ── */
