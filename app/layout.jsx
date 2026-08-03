@@ -85,7 +85,7 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
         {/* Google Analytics */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-Z3ZB7HN1SF"
+          src="https://www.googletagmanager.com/gtag/js?id=G-WXFLXZLG2G"
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
@@ -93,7 +93,7 @@ export default function RootLayout({ children }) {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-Z3ZB7HN1SF');
+            gtag('config', 'G-WXFLXZLG2G');
           `}
         </Script>
 
